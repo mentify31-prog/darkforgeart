@@ -127,15 +127,36 @@
       <button id="mobile-menu-close" class="btn btn-ghost" aria-label="Close menu" style="padding:0.4rem;font-size:1.2rem;color:var(--color-white);">✕</button>
     </div>
     <div class="mobile-drawer-body">
-      <a href="{% url 'gallery:gallery' %}">🎨 Gallery</a>
-      <a href="{% url 'store:shop' %}">🛍️ Shop</a>
-      <a href="{% url 'commissions:commission_request' %}">✍️ Request Commission</a>
-      <a href="{% url 'gallery:about' %}">⚔️ About the Artist</a>
-      <a href="{% url 'accounts:contact' %}">💬 Support</a>
+      <a href="{% url 'gallery:gallery' %}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Gallery
+      </a>
+      <a href="{% url 'store:shop' %}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Shop
+      </a>
+      <a href="{% url 'commissions:commission_request' %}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Request Commission
+      </a>
+      <a href="{% url 'gallery:about' %}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        About the Artist
+      </a>
+      <a href="{% url 'accounts:contact' %}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        Support
+      </a>
       <hr style="border:0;border-top:1px solid var(--color-border);margin:1rem 0;">
       {% if user.is_authenticated %}
-        <a href="{{ user.get_dashboard_url }}">📊 Dashboard</a>
-        <a href="{% url 'accounts:profile' %}">👤 Profile</a>
+        <a href="{{ user.get_dashboard_url }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a href="{% url 'accounts:profile' %}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Profile
+        </a>
         <form method="post" action="{% url 'accounts:logout' %}" style="margin-top:0.5rem;">
           {% csrf_token %}
           <button type="submit" class="btn btn-outline btn-sm" style="width:100%;justify-content:center;">Sign Out</button>
