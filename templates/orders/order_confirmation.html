@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section>
+  <div class="container" style="max-width:640px;text-align:center;padding-top:3rem;">
+    <div style="font-size:3rem;margin-bottom:1.5rem;">✦</div>
+    <p class="text-upper text-accent" style="margin-bottom:0.5rem;">Payment Confirmed</p>
+    <h1 style="font-size:2rem;margin-bottom:1rem;">Order Received</h1>
+    <p style="color:var(--color-text-muted);margin-bottom:0.5rem;">Order number: <strong style="color:var(--color-white);">{{ order.order_number }}</strong></p>
+    <p style="color:var(--color-text-muted);margin-bottom:2.5rem;">A confirmation has been sent to <strong style="color:var(--color-white);">{{ order.shipping_email }}</strong></p>
+
+    <div style="border:1px solid var(--color-border);padding:1.5rem;margin-bottom:2rem;text-align:left;">
+      <h3 style="font-size:0.9rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);margin-bottom:1rem;">Order Items</h3>
+      {% for item in items %}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--color-border);">
+        <div>
+          <p style="font-size:0.875rem;color:var(--color-white);">{{ item.product.title }}</p>
+          <p style="font-size:0.75rem;color:var(--color-text-muted);">{{ item.get_fulfillment_type_display }} × {{ item.quantity }}</p>
+        </div>
+        <p style="font-size:0.875rem;color:var(--color-white);">KES {{ item.subtotal|floatformat:0 }}</p>
+      </div>
+      {% endfor %}
+      <div style="display:flex;justify-content:space-between;margin-top:1rem;">
+        <strong>Total Paid</strong>
+        <strong style="font-family:var(--font-display);">KES {{ order.total_amount|floatformat:0 }}</strong>
+      </div>
+    </div>
+
+    {% if order.has_digital_items %}
+    <div style="border:1px solid var(--color-accent-dim);padding:1.5rem;margin-bottom:2rem;background:rgba(127,29,29,0.15);text-align:left;">
+      <h4 style="color:var(--color-white);font-size:1rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;">
+        <span>📬</span> Your Digital Download Links
+      </h4>
+      <p style="color:var(--color-text);font-size:0.875rem;line-height:1.6;margin-bottom:0.75rem;">
+        Your high-resolution artwork download link has been sent to <strong style="color:var(--color-white);">{{ order.shipping_email }}</strong>.
+      </p>
+      <p style="color:var(--color-text-muted);font-size:0.8rem;line-height:1.5;margin-bottom:1rem;">
+        ⚠️ <strong>Can't find the email?</strong> Please check your <strong>Spam / Junk</strong> folder, or click the button below to download your files directly in your browser:
+      </p>
+      <a href="{% url 'orders:order_detail' order.order_number %}" class="btn btn-primary btn-sm">
+        View Order &amp; Download Files →
+      </a>
+    </div>
+    {% endif %}
+
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+      <a href="{% url 'orders:order_detail' order.order_number %}" class="btn btn-primary">View Order &amp; Download Files →</a>
+      {% if user.is_authenticated %}
+      <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline">My Dashboard</a>
+      {% endif %}
+      <a href="{% url 'gallery:gallery' %}" class="btn btn-ghost">Browse Gallery</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

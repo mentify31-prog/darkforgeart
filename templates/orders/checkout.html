@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section>
+  <div class="container" style="max-width:720px;">
+    <div style="margin-bottom:2.5rem;">
+      <p class="text-upper text-muted" style="margin-bottom:0.4rem;">Checkout</p>
+      <h1 style="font-size:1.75rem;">Complete Your Order</h1>
+    </div>
+
+    <form method="post" action="{% url 'payments:initiate' %}" novalidate>
+      {% csrf_token %}
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start;">
+        {# Left: Contact + Shipping #}
+        <div>
+          <h3 style="font-size:0.9rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);margin-bottom:1.5rem;">Contact</h3>
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" required placeholder="Your full name">
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required
+                   value="{{ user.email|default:'' }}" placeholder="For order confirmation and download links">
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone (optional)</label>
+            <input type="tel" id="phone" name="phone" placeholder="+254 700 000000">
+          </div>
+
+          {% if requires_shipping %}
+          <h3 style="font-size:0.9rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);margin:2rem 0 1.5rem;">Shipping Address</h3>
+          <div class="form-group">
+            <label for="address1">Street Address</label>
+            <input type="text" id="address1" name="address1" required>
+          </div>
+          <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" name="city" required>
+          </div>
+          <div class="form-group">
+            <label for="zip">ZIP / Postal Code</label>
+            <input type="text" id="zip" name="zip">
+          </div>
+          <div class="form-group">
+            <label for="country_code">Country</label>
+            <select id="country_code" name="country_code">
+              <option value="KE" selected>Kenya</option>
+              <option value="UG">Uganda</option>
+              <option value="TZ">Tanzania</option>
+              <option value="RW">Rwanda</option>
+              <option value="NG">Nigeria</option>
+              <option value="GH">Ghana</option>
+              <option value="ZA">South Africa</option>
+              <option value="US">United States</option>
+              <option value="GB">United Kingdom</option>
+              <option value="DE">Germany</option>
+              <option value="FR">France</option>
+            </select>
+          </div>
+          {% else %}
+          <input type="hidden" name="country_code" value="KE">
+          {% endif %}
+        </div>
+
+        {# Right: Order Summary #}
+        <div>
+          <h3 style="font-size:0.9rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);margin-bottom:1.5rem;">Order Summary</h3>
+          <div style="border:1px solid var(--color-border);padding:1.25rem;margin-bottom:1.5rem;">
+            {% for item in cart_items %}
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;padding-bottom:0.75rem;border-bottom:1px solid var(--color-border);">
+              <div>
+                <p style="font-size:0.875rem;color:var(--color-white);">{{ item.product.title }}</p>
+                {% if item.variant %}<p style="font-size:0.75rem;color:var(--color-text-muted);">{{ item.variant.size }} / {{ item.variant.color }}</p>{% endif %}
+                <p style="font-size:0.75rem;color:var(--color-text-muted);">× {{ item.quantity }}</p>
+              </div>
+              <p style="font-size:0.875rem;color:var(--color-white);">${{ item.subtotal_usd|floatformat:2 }}</p>
+            </div>
+            {% endfor %}
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;">
+              <strong style="font-family:var(--font-display);">Total</strong>
+              <strong style="font-family:var(--font-display);font-size:1.3rem;">${{ total_usd|floatformat:2 }}</strong>
+            </div>
+          </div>
+
+          {# Pay button — redirects to Paystack hosted checkout #}
+          <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;">
+            Pay ${{ total_usd|floatformat:2 }} Securely →
+          </button>
+
+          <p style="font-size:0.75rem;color:var(--color-text-faint);text-align:center;margin-top:1rem;">
+            Secured by Paystack. Card &amp; M-Pesa accepted (approx KES {{ total|floatformat:0 }}).
+          </p>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<style>
+@media(max-width:700px) {
+  form > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr !important; }
+}
+</style>
+{% endblock %}

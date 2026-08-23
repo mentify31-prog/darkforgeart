@@ -1,0 +1,8 @@
+We have received your custom commission request!
+
+Commission ID: #{{ commission.pk }}
+Title: {{ commission.title }}
+
+We will review your vision and send you a custom price quote shortly.
+
+DarkForge Art — Dark & Gothic Custom Art Commissions

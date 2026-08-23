@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Gallery — DarkForge Art{% endblock %}
+
+{% block content %}
+<section style="padding-top:2rem;">
+  <div class="container">
+    <div style="margin-bottom:2rem;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <p class="text-upper text-accent" style="margin-bottom:0.4rem;">The Collection</p>
+        <h1 style="font-size:2.2rem;margin:0;">Gallery</h1>
+      </div>
+
+      {# ── Tag Search & Dropdown Filter ── #}
+      <form method="get" action="{% url 'gallery:gallery' %}" style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+        <label for="tag-select" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted);">Filter Tag:</label>
+        <select id="tag-select" name="tag" onchange="this.form.submit()" style="background:var(--color-surface);color:var(--color-text);border:1px solid var(--color-border);padding:0.45rem 1rem;font-size:0.85rem;border-radius:2px;cursor:pointer;min-width:180px;">
+          <option value="">All Categories ({{ tags|length }})</option>
+          {% for tag in tags %}
+          <option value="{{ tag.slug }}" {% if selected_tag.slug == tag.slug %}selected{% endif %}>
+            #{{ tag.name }}
+          </option>
+          {% endfor %}
+        </select>
+        {% if selected_tag %}
+        <a href="{% url 'gallery:gallery' %}" class="btn btn-ghost btn-sm" style="font-size:0.75rem;">Clear</a>
+        {% endif %}
+      </form>
+    </div>
+
+    {# ── Sleek Horizontal Scrollable Filter Bar for Popular Tags ── #}
+    <div style="margin-bottom:3rem;display:flex;align-items:center;gap:0.6rem;overflow-x:auto;padding-bottom:0.5rem;scrollbar-width:thin;scrollbar-color:var(--color-border) transparent;">
+      <a href="{% url 'gallery:gallery' %}"
+         style="padding:0.4rem 1.1rem;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;border:1px solid {% if not selected_tag %}var(--color-accent){% else %}var(--color-border){% endif %};color:{% if not selected_tag %}var(--color-white){% else %}var(--color-text-muted){% endif %};background:{% if not selected_tag %}var(--color-surface-raised){% else %}transparent{% endif %};">
+        All
+      </a>
+      {% for tag in tags|slice:":15" %}
+      <a href="{% url 'gallery:gallery' %}?tag={{ tag.slug }}"
+         style="padding:0.4rem 1.1rem;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;border:1px solid {% if selected_tag.slug == tag.slug %}var(--color-accent){% else %}var(--color-border){% endif %};color:{% if selected_tag.slug == tag.slug %}var(--color-accent-light){% else %}var(--color-text-muted){% endif %};background:{% if selected_tag.slug == tag.slug %}var(--color-surface-raised){% else %}transparent{% endif %};">
+        #{{ tag.name }}
+      </a>
+      {% endfor %}
+    </div>
+
+    {# ── Clean Artwork Grid (No Grey Blank Space) ── #}
+    {% if artworks %}
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:2rem;">
+      {% for artwork in artworks %}
+      <article style="background:var(--color-surface);border:1px solid var(--color-border);overflow:hidden;transition:border-color 0.3s ease,transform 0.3s ease;" class="gallery-card">
+        <a href="{% url 'gallery:artwork_detail' artwork.slug %}" style="display:block;color:inherit;text-decoration:none;">
+          <div style="aspect-ratio:1;overflow:hidden;position:relative;background:var(--color-bg);">
+            {% if artwork.preview_public_url %}
+            <img
+              src="{{ artwork.preview_public_url }}"
+              alt="{{ artwork.title }} — dark art preview"
+              loading="lazy"
+              style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease,filter 0.4s ease;"
+              class="gallery-img"
+            >
+            {% else %}
+            <div style="width:100%;height:100%;background:var(--color-surface-raised);display:flex;align-items:center;justify-content:center;">
+              <span style="font-family:var(--font-display);color:var(--color-text-faint);font-size:0.9rem;">{{ artwork.title }}</span>
+            </div>
+            {% endif %}
+
+            {# Hover Badge Overlay #}
+            <div class="gallery-overlay" style="position:absolute;inset:0;background:rgba(0,0,0,0.6);opacity:0;transition:opacity 0.3s ease;display:flex;align-items:center;justify-content:center;">
+              <span class="btn btn-outline btn-sm" style="font-size:0.75rem;">View Artwork →</span>
+            </div>
+          </div>
+
+          <div style="padding:1.25rem;">
+            <p class="text-upper text-accent" style="font-size:0.7rem;margin-bottom:0.3rem;">{{ artwork.get_style_display }}</p>
+            <h3 style="font-family:var(--font-display);font-size:1.1rem;color:var(--color-white);margin-bottom:0.4rem;line-height:1.3;">{{ artwork.title }}</h3>
+            {% if artwork.description %}
+            <p style="font-size:0.8rem;color:var(--color-text-muted);line-height:1.5;margin-bottom:0.5rem;">
+              {{ artwork.description|truncatewords:14 }}
+            </p>
+            {% endif %}
+            {% if artwork.tags.all %}
+            <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.5rem;">
+              {% for t in artwork.tags.all|slice:":3" %}
+              <span style="font-size:0.7rem;color:var(--color-text-faint);">#{{ t.name }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+        </a>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="border:1px solid var(--color-border);padding:5rem 2rem;text-align:center;color:var(--color-text-muted);background:var(--color-surface);">
+      <p style="font-family:var(--font-display);font-size:1.5rem;margin-bottom:1rem;color:var(--color-white);">No works found for this filter.</p>
+      <a href="{% url 'gallery:gallery' %}" class="btn btn-outline">Clear Filters</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+.gallery-card:hover {
+  border-color: var(--color-accent) !important;
+  transform: translateY(-4px);
+}
+.gallery-card:hover .gallery-img {
+  transform: scale(1.04);
+}
+.gallery-card:hover .gallery-overlay {
+  opacity: 1 !important;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section>
+  <div class="container" style="max-width:860px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2.5rem;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <p class="text-upper text-muted" style="margin-bottom:0.4rem;">Shopping Cart</p>
+        <h1 style="font-size:1.75rem;">Your Cart{% if cart_items %} ({{ cart_items|length }}){% endif %}</h1>
+      </div>
+      <a href="{% url 'store:shop' %}" class="btn btn-ghost btn-sm">← Continue Shopping</a>
+    </div>
+
+    {% if cart_items %}
+    <div style="display:flex;flex-direction:column;gap:0;border-top:1px solid var(--color-border);">
+      {% for item in cart_items %}
+      <div style="display:grid;grid-template-columns:80px 1fr auto;gap:1.25rem;align-items:center;padding:1.25rem 0;border-bottom:1px solid var(--color-border);">
+        {# Thumbnail #}
+        <div style="aspect-ratio:1;overflow:hidden;background:var(--color-surface);">
+          {% if item.preview_url %}
+          <img src="{{ item.preview_url }}" alt="{{ item.product.title }}" loading="lazy"
+               style="width:100%;height:100%;object-fit:cover;">
+          {% endif %}
+        </div>
+
+        {# Details #}
+        <div>
+          <p style="font-family:var(--font-display);font-size:0.95rem;color:var(--color-white);margin-bottom:0.25rem;">{{ item.product.title }}</p>
+          {% if item.variant %}
+          <p style="font-size:0.8rem;color:var(--color-text-muted);">{{ item.variant.size }} / {{ item.variant.color }}</p>
+          {% endif %}
+          <p style="font-size:0.8rem;color:var(--color-text-muted);">{{ item.product.get_product_type_display }}</p>
+
+          {# Quantity update #}
+          <form method="post" action="{% url 'store:update_cart' item.key %}" style="display:inline-flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
+            {% csrf_token %}
+            <select name="quantity" onchange="this.form.submit()" style="background:var(--color-surface);color:var(--color-text);border:1px solid var(--color-border);padding:0.25rem 0.5rem;font-size:0.8rem;border-radius:2px;cursor:pointer;min-width:65px;">
+              <option value="1" {% if item.quantity == 1 %}selected{% endif %}>1</option>
+              <option value="2" {% if item.quantity == 2 %}selected{% endif %}>2</option>
+              <option value="3" {% if item.quantity == 3 %}selected{% endif %}>3</option>
+              <option value="4" {% if item.quantity == 4 %}selected{% endif %}>4</option>
+              <option value="5" {% if item.quantity == 5 %}selected{% endif %}>5</option>
+              <option value="10" {% if item.quantity == 10 %}selected{% endif %}>10</option>
+            </select>
+          </form>
+        </div>
+
+        {# Price + Remove #}
+        <div style="text-align:right;">
+          <p style="font-family:var(--font-display);font-size:1rem;color:var(--color-white);margin-bottom:0.5rem;">${{ item.subtotal_usd|floatformat:2 }}</p>
+          <form method="post" action="{% url 'store:remove_from_cart' item.key %}">
+            {% csrf_token %}
+            <button type="submit" style="background:none;border:none;color:var(--color-text-faint);font-size:0.75rem;cursor:pointer;text-transform:uppercase;letter-spacing:0.06em;">Remove</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {# Order Total #}
+    <div style="display:flex;justify-content:flex-end;padding:1.5rem 0;border-bottom:1px solid var(--color-border);margin-bottom:1.5rem;">
+      <div style="text-align:right;">
+        <p style="color:var(--color-text-muted);font-size:0.875rem;margin-bottom:0.25rem;">Order Total</p>
+        <p style="font-family:var(--font-display);font-size:1.75rem;color:var(--color-white);">${{ total_usd|floatformat:2 }}</p>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;">
+      <a href="{% url 'orders:checkout' %}" class="btn btn-primary btn-lg">
+        Proceed to Checkout →
+      </a>
+    </div>
+
+    {% else %}
+    <div style="text-align:center;padding:5rem 0;color:var(--color-text-muted);">
+      <p style="font-family:var(--font-display);font-size:1.5rem;margin-bottom:1.5rem;">Your cart is empty.</p>
+      <a href="{% url 'store:shop' %}" class="btn btn-primary">Browse Shop</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

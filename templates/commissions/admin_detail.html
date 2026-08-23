@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Admin: {{ commission.title }} — DarkForge Art{% endblock %}
+
+{% block content %}
+<section>
+  <div class="container" style="max-width:900px;">
+    <div style="margin-bottom:1.5rem;">
+      <a href="{% url 'commissions:admin_commissions_list' %}" style="font-size:0.8rem;color:var(--color-text-muted);">← All Commissions</a>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2.5rem;">
+      <div>
+        <p class="text-upper text-accent" style="margin-bottom:0.4rem;">Admin Control</p>
+        <h1 style="font-size:1.75rem;">{{ commission.title }}</h1>
+        <p style="color:var(--color-text-muted);font-size:0.875rem;margin-top:0.4rem;">
+          Client: <strong>{{ commission.client.get_full_name|default:commission.client.email }}</strong> ({{ commission.client.email }})
+        </p>
+      </div>
+      <span style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;border:1px solid var(--color-accent);padding:0.5rem 1rem;color:var(--color-accent-light);">
+        {{ commission.get_status_display }}
+      </span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:2rem;align-items:start;">
+
+      {# Left Column: Request Details & Revisions #}
+      <div>
+        {# Request Summary #}
+        <div style="border:1px solid var(--color-border);padding:1.5rem;margin-bottom:2rem;background:var(--color-surface);">
+          <h3 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);margin-bottom:1rem;">Commission Brief</h3>
+          <p style="line-height:1.8;margin-bottom:1rem;">{{ commission.description }}</p>
+          <div style="font-size:0.85rem;color:var(--color-text-muted);display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+            <p><strong>Tier:</strong> {{ commission.get_tier_display }}</p>
+            <p><strong>Style:</strong> {{ commission.preferred_style|default:"Not specified" }}</p>
+            <p><strong>Colors:</strong> {{ commission.preferred_colors|default:"Not specified" }}</p>
+            <p><strong>Dimensions:</strong> {{ commission.dimensions|default:"Not specified" }}</p>
+            <p><strong>Intended Use:</strong> {{ commission.get_intended_use_display }}</p>
+          </div>
+        </div>
+
+        {# Revisions History #}
+        {% if revisions %}
+        <div style="margin-bottom:2rem;">
+          <h3 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);margin-bottom:1rem;">Uploaded Revisions</h3>
+          {% for revision in revisions %}
+          <div style="border:1px solid var(--color-border);padding:1.25rem;margin-bottom:1rem;background:var(--color-surface);">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.75rem;">
+              <strong>Revision #{{ revision.revision_number }}</strong>
+              <span style="font-size:0.8rem;color:var(--color-text-muted);">{{ revision.get_client_response_display }}</span>
+            </div>
+            {% if revision.artist_notes %}<p style="font-size:0.85rem;color:var(--color-text-muted);margin-bottom:0.5rem;">Artist: {{ revision.artist_notes }}</p>{% endif %}
+            {% if revision.client_notes %}<p style="font-size:0.85rem;color:var(--color-accent-light);margin-bottom:0.5rem;">Client Feedback: {{ revision.client_notes }}</p>{% endif %}
+            {% if revision.preview_url %}
+            <img src="{{ revision.get_preview_public_url }}" alt="Preview #{{ revision.revision_number }}" style="max-width:100%;border:1px solid var(--color-border);">
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {# Message Thread #}
+        <div style="border:1px solid var(--color-border);padding:1.5rem;background:var(--color-surface);">
+          <h3 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);margin-bottom:1rem;">Communication History</h3>
+          {% if messages %}
+          <div style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.25rem;max-height:350px;overflow-y:auto;">
+            {% for msg in messages %}
+            <div style="padding:0.75rem;background:{% if msg.sender.is_admin %}rgba(185,28,28,0.15){% else %}var(--color-bg){% endif %};">
+              <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;font-size:0.75rem;color:var(--color-text-muted);">
+                <strong>{{ msg.sender.get_full_name|default:msg.sender.email }} {% if msg.sender.is_admin %}(Artist/Admin){% endif %}</strong>
+                <span>{{ msg.created_at|date:"M j, H:i" }}</span>
+              </div>
+              <p style="font-size:0.875rem;">{{ msg.message }}</p>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          <form method="post" action="{% url 'commissions:admin_message_commission' commission.pk %}">
+            {% csrf_token %}
+            {{ message_form.message }}
+            <button type="submit" class="btn btn-outline btn-sm" style="margin-top:0.75rem;">Send Message to Client</button>
+          </form>
+        </div>
+      </div>
+
+      {# Right Column: Admin Actions (Quote, Upload Preview, Complete) #}
+      <div style="position:sticky;top:calc(var(--nav-height) + 2rem);">
+
+        {# 1. Quote Form #}
+        <div style="border:1px solid var(--color-border);padding:1.5rem;margin-bottom:1.5rem;background:var(--color-surface);">
+          <h3 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);margin-bottom:1rem;">1. Send Quote</h3>
+          {% if commission.quoted_price %}
+          <p style="font-size:0.9rem;margin-bottom:0.5rem;">Current Quote: <strong>KES {{ commission.quoted_price|floatformat:0 }}</strong></p>
+          <p style="font-size:0.8rem;color:var(--color-text-muted);margin-bottom:1rem;">Deposit: KES {{ commission.deposit_amount|floatformat:0 }} &bull; Balance: KES {{ commission.final_amount|floatformat:0 }}</p>
+          {% endif %}
+          <form method="post" action="{% url 'commissions:admin_quote_commission' commission.pk %}">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="id_quoted_price">Quoted Price (KES)</label>
+              {{ quote_form.quoted_price }}
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="width:100%;justify-content:center;">
+              {% if commission.quoted_price %}Update Quote{% else %}Send Quote & Notify Client{% endif %}
+            </button>
+          </form>
+        </div>
+
+        {# 2. Upload Watermarked Preview #}
+        <div style="border:1px solid var(--color-border);padding:1.5rem;margin-bottom:1.5rem;background:var(--color-surface);">
+          <h3 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);margin-bottom:1rem;">2. Upload Preview</h3>
+          <form method="post" action="{% url 'commissions:admin_upload_preview' commission.pk %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="id_preview_file">Preview Image</label>
+              <input type="file" name="preview_file" required accept="image/*">
+              <p style="font-size:0.7rem;color:var(--color-text-faint);margin-top:0.25rem;">Will be automatically watermarked before saving.</p>
+            </div>
+            <div class="form-group">
+              <label for="id_artist_notes">Notes for Client</label>
+              <textarea name="artist_notes" rows="2" placeholder="e.g. Added the requested red accents..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="width:100%;justify-content:center;">
+              Upload &amp; Send Preview
+            </button>
+          </form>
+        </div>
+
+        {# 3. Mark Complete #}
+        <div style="border:1px solid var(--color-border);padding:1.5rem;background:var(--color-surface);">
+          <h3 style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);margin-bottom:1rem;">3. Deliver Final Artwork</h3>
+          <form method="post" action="{% url 'commissions:admin_complete_commission' commission.pk %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+              <label>Final High-Res File</label>
+              <input type="file" name="final_file" required>
+            </div>
+            <button type="submit" class="btn btn-outline btn-sm" style="width:100%;justify-content:center;" onclick="return confirm('Complete commission and release final file?')">
+              Mark Completed &amp; Release
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+@media(max-width:850px) {
+  .container > div[style*="grid-template-columns:1fr 340px"] { grid-template-columns:1fr !important; }
+}
+</style>
+{% endblock %}

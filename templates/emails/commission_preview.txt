@@ -1,0 +1,9 @@
+New preview available for your commission!
+
+Commission ID: #{{ commission.pk }}
+Revision Label: {{ revision.step_label }}
+
+Review your preview here:
+{{ commission_url }}
+
+DarkForge Art

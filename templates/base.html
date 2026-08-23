@@ -1,0 +1,226 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  {# SEO #}
+  <title>{% block title %}{{ page_title|default:PLATFORM_NAME }}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{{ meta_description|default:'DarkForge Art — Original dark graffiti artwork, digital prints, apparel and custom commissions.' }}{% endblock %}">
+  <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
+  <link rel="canonical" href="{{ BASE_URL }}{% block canonical %}{{ request.path }}{% endblock %}">
+
+  {# Open Graph #}
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ PLATFORM_NAME }}">
+  <meta property="og:title" content="{% block og_title %}{{ page_title|default:PLATFORM_NAME }}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ meta_description|default:'Premium dark graffiti art and custom commissions.' }}{% endblock %}">
+  <meta property="og:url" content="{{ BASE_URL }}{{ request.path }}">
+  {% if og_image %}<meta property="og:image" content="{{ og_image }}">{% endif %}
+
+  {# Twitter Card #}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% block twitter_title %}{{ page_title|default:PLATFORM_NAME }}{% endblock %}">
+  <meta name="twitter:description" content="{% block twitter_description %}{{ meta_description|default:'' }}{% endblock %}">
+
+  {# Fonts — served from Google Fonts for elegance #}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+
+  {# Favicon & Social #}
+  <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
+
+  {# Base CSS #}
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block extra_css %}{% endblock %}
+
+  {# Structured Data — Organization #}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "DarkForge Art",
+    "url": "{{ BASE_URL }}",
+    "description": "Original dark graffiti artwork, digital prints, apparel and custom commissions.",
+    "logo": "{{ BASE_URL }}{% static 'img/logo.png' %}"
+  }
+  </script>
+  {% block structured_data %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+  {# Site Navigation #}
+  <header class="site-nav" role="banner">
+    <div class="nav-inner">
+      <a href="{% url 'gallery:home' %}" class="nav-logo" style="display:inline-flex;align-items:center;gap:0.75rem;">
+        <img src="{% static 'img/logo.png' %}" alt="DarkForge Art Logo" style="height:42px;width:auto;max-width:42px;object-fit:contain;">
+        Dark<span>Forge</span> Art
+      </a>
+
+      <nav aria-label="Main navigation">
+        <ul class="nav-links">
+          <li><a href="{% url 'gallery:gallery' %}" {% if request.resolver_match.url_name == 'gallery' %}class="active"{% endif %}>Gallery</a></li>
+          <li><a href="{% url 'store:shop' %}" {% if request.resolver_match.app_name == 'store' %}class="active"{% endif %}>Shop</a></li>
+          <li><a href="{% url 'commissions:commission_request' %}" {% if request.resolver_match.app_name == 'commissions' %}class="active"{% endif %}>Commissions</a></li>
+          <li><a href="{% url 'gallery:about' %}" {% if request.resolver_match.url_name == 'about' %}class="active"{% endif %}>About</a></li>
+          <li><a href="{% url 'accounts:contact' %}" {% if request.resolver_match.url_name == 'contact' %}class="active"{% endif %}>Support</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        {# Theme toggle #}
+        <button id="theme-toggle" class="btn btn-ghost btn-sm" aria-label="Toggle theme" style="padding:0.4rem 0.6rem;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;">
+          <svg id="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg id="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        {# Cart icon #}
+        <a href="{% url 'store:cart' %}" class="cart-icon" aria-label="View cart">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
+          {% if cart_count %}<span class="cart-badge">{{ cart_count }}</span>{% endif %}
+        </a>
+
+        {% if user.is_authenticated %}
+          <a href="{{ user.get_dashboard_url }}" class="btn btn-ghost btn-sm">Dashboard</a>
+          <form method="post" action="{% url 'accounts:logout' %}" style="display:inline;margin:0;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline btn-sm" style="color:var(--color-text-muted);">Sign Out</button>
+          </form>
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="btn btn-ghost btn-sm">Sign In</a>
+          <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm">Join</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  {# Django Messages #}
+  {% if messages %}
+  <div class="messages-container" role="alert" aria-live="polite">
+    {% for message in messages %}
+    <div class="message message-{{ message.tags }}" data-autohide="5000">
+      <span>{{ message }}</span>
+      <button class="message-close" aria-label="Dismiss" onclick="this.parentElement.remove()">✕</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# Main Content #}
+  <main class="site-main" id="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  {# Footer #}
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="brand-name">DarkForge Art</div>
+        <p>Original dark graffiti art, digital prints,<br>apparel and custom commissions.</p>
+      </div>
+
+      <div class="footer-links">
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="{% url 'store:shop' %}?type=digital">Digital Downloads</a></li>
+          <li><a href="{% url 'store:shop' %}?type=physical">Merchandise</a></li>
+          <li><a href="{% url 'store:shop' %}?type=limited">Limited Editions</a></li>
+          <li><a href="{% url 'store:shop' %}?type=license">Licenses</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links">
+        <h4>Art</h4>
+        <ul>
+          <li><a href="{% url 'gallery:gallery' %}">Gallery</a></li>
+          <li><a href="{% url 'commissions:commission_request' %}">Request Commission</a></li>
+          <li><a href="#about">About the Artist</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links">
+        <h4>Support &amp; Account</h4>
+        <ul>
+          <li><a href="{% url 'accounts:contact' %}">Contact Support</a></li>
+          {% if user.is_authenticated %}
+          <li><a href="{{ user.get_dashboard_url }}">Dashboard</a></li>
+          <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
+          <li><a href="{% url 'commissions:my_commissions' %}">My Commissions</a></li>
+          {% else %}
+          <li><a href="{% url 'accounts:login' %}">Sign In</a></li>
+          <li><a href="{% url 'accounts:register' %}">Create Account</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>&copy; {% now "Y" %} DarkForge Art. All rights reserved.</span>
+      <span>Artwork is protected. Unauthorized use is prohibited.</span>
+    </div>
+  </footer>
+
+  {# Base JS — auto-dismiss messages & theme toggle #}
+  <script>
+    document.querySelectorAll('.message[data-autohide]').forEach(function(el) {
+      var delay = parseInt(el.dataset.autohide, 10);
+      setTimeout(function() {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.4s ease';
+        setTimeout(function() { el.remove(); }, 400);
+      }, delay);
+    });
+
+    // Theme Toggle
+    (function() {
+      const toggleBtn = document.getElementById('theme-toggle');
+      const sunIcon = document.getElementById('theme-icon-sun');
+      const moonIcon = document.getElementById('theme-icon-moon');
+      const savedTheme = localStorage.getItem('dfa_theme') || 'dark';
+
+      function applyTheme(theme) {
+        if (theme === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light');
+          if (sunIcon) sunIcon.style.display = 'block';
+          if (moonIcon) moonIcon.style.display = 'none';
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          if (sunIcon) sunIcon.style.display = 'none';
+          if (moonIcon) moonIcon.style.display = 'block';
+        }
+      }
+
+      applyTheme(savedTheme);
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+          const currentTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+          const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+          localStorage.setItem('dfa_theme', newTheme);
+          applyTheme(newTheme);
+        });
+      }
+    })();
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

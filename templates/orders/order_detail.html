@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section>
+  <div class="container" style="max-width:720px;">
+    <div style="margin-bottom:2rem;">
+      <a href="{% url 'accounts:dashboard' %}" style="font-size:0.8rem;color:var(--color-text-muted);">← Dashboard</a>
+    </div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;">
+      <div>
+        <p class="text-upper text-muted" style="margin-bottom:0.4rem;">Order Detail</p>
+        <h1 style="font-size:1.5rem;">{{ order.order_number }}</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem;">
+        {% if order.status != 'paid' and order.status != 'fulfilled' %}
+        <a href="{% url 'orders:verify_order_payment' order.order_number %}" class="btn btn-primary btn-sm">
+          Verify Payment Status ↻
+        </a>
+        {% endif %}
+        <span style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:{% if order.status == 'paid' or order.status == 'fulfilled' %}#22c55e{% elif order.status == 'cancelled' %}var(--color-accent-light){% else %}var(--color-text-muted){% endif %};">
+          {{ order.get_status_display }}
+        </span>
+      </div>
+    </div>
+
+    {# Items #}
+    <div style="border:1px solid var(--color-border);margin-bottom:1.5rem;">
+      {% for item in items %}
+      <div style="display:grid;grid-template-columns:60px 1fr auto;gap:1rem;align-items:center;padding:1rem;border-bottom:1px solid var(--color-border);">
+        <div style="aspect-ratio:1;background:var(--color-surface);overflow:hidden;">
+          {% if item.product.artwork.preview_url %}
+          <img src="{{ item.product.artwork.get_preview_public_url }}" alt="{{ item.product.title }}" loading="lazy"
+               style="width:100%;height:100%;object-fit:cover;">
+          {% endif %}
+        </div>
+        <div>
+          <p style="font-size:0.9rem;color:var(--color-white);">{{ item.product.title }}</p>
+          <p style="font-size:0.75rem;color:var(--color-text-muted);">{{ item.get_fulfillment_type_display }} × {{ item.quantity }}</p>
+          <p style="font-size:0.7rem;color:var(--color-text-faint);margin-top:0.25rem;">{{ item.get_fulfillment_status_display }}</p>
+          {# Download link if digital #}
+          {% if item.fulfillment_type == 'digital' or item.fulfillment_type == 'license' %}
+            {% if item.digital_delivery and item.digital_delivery.is_valid %}
+            <a href="{% url 'orders:download' item.digital_delivery.download_token %}"
+               class="btn btn-outline btn-sm" style="margin-top:0.5rem;">
+              Download ({{ item.digital_delivery.max_downloads|add:"-0"|floatformat:0 }} uses left)
+            </a>
+            {% elif item.digital_delivery %}
+            <span style="font-size:0.75rem;color:var(--color-accent-light);">Download link expired or exhausted</span>
+            {% endif %}
+          {% endif %}
+        </div>
+        <p style="font-size:0.875rem;color:var(--color-white);">KES {{ item.subtotal|floatformat:0 }}</p>
+      </div>
+      {% endfor %}
+      <div style="display:flex;justify-content:flex-end;padding:1rem;gap:1rem;align-items:center;">
+        <span style="color:var(--color-text-muted);">Total</span>
+        <strong style="font-family:var(--font-display);font-size:1.2rem;">KES {{ order.total_amount|floatformat:0 }}</strong>
+      </div>
+    </div>
+
+    {# Shipping info #}
+    {% if order.shipping_address %}
+    <div style="border:1px solid var(--color-border);padding:1.25rem;">
+      <h3 style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);margin-bottom:0.75rem;">Shipping Address</h3>
+      <p>{{ order.shipping_name }}</p>
+      <p style="color:var(--color-text-muted);font-size:0.875rem;">{{ order.shipping_address.address1 }}, {{ order.shipping_address.city }}, {{ order.shipping_address.country_code }}</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}DarkForge Art — Original Dark & Graffiti Art{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "DarkForge Art",
+  "url": "{{ BASE_URL }}",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "{{ BASE_URL }}/gallery/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+
+{# ─── Hero Section ─────────────────────────────────────────── #}
+{% if featured_artworks %}
+<section class="hero full-bleed" style="position:relative;overflow:hidden;min-height:90vh;display:flex;align-items:flex-end;">
+  {# Hero background — first featured artwork preview #}
+  {% with featured_artworks.0 as hero_art %}
+  {% if hero_art.preview_public_url %}
+  <div class="hero-bg" style="
+    position:absolute;inset:0;
+    background-image:url('{{ hero_art.preview_public_url }}');
+    background-size:cover;background-position:center;
+    filter:brightness(0.35) contrast(1.1);
+  "></div>
+  {% endif %}
+  {% endwith %}
+
+  {# Dark overlay #}
+  <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(10,10,10,0.98) 0%, rgba(10,10,10,0.3) 60%, transparent 100%);"></div>
+
+  <div class="container" style="position:relative;z-index:1;padding-bottom:5rem;">
+    <p class="text-upper text-accent" style="margin-bottom:1rem;">Original Artwork</p>
+    <h1 style="max-width:16ch;margin-bottom:1.5rem;">
+      Dark Art.<br>Forged in Ink.
+    </h1>
+    <p style="color:var(--color-text-muted);max-width:50ch;font-size:1.05rem;margin-bottom:2.5rem;">
+      Graffiti-inspired dark art — hand-drawn originals transformed into digital prints,
+      limited editions, and custom commissions.
+    </p>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+      <a href="{% url 'gallery:gallery' %}" class="btn btn-primary btn-lg">Explore the Gallery</a>
+      <a href="{% url 'commissions:commission_request' %}" class="btn btn-outline btn-lg">Request Commission</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ─── Featured Artworks ────────────────────────────────────── #}
+{% if featured_artworks %}
+<section>
+  <div class="container">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2.5rem;">
+      <div>
+        <p class="text-upper text-muted" style="margin-bottom:0.5rem;">Selected Works</p>
+        <h2>Featured Art</h2>
+      </div>
+      <a href="{% url 'gallery:gallery' %}" class="btn btn-ghost">View All →</a>
+    </div>
+
+    <div class="artwork-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;">
+      {% for artwork in featured_artworks %}
+      <article class="artwork-card fade-in-up" style="position:relative;overflow:hidden;background:var(--color-surface);">
+        <a href="{% url 'gallery:artwork_detail' artwork.slug %}">
+          {% if artwork.preview_public_url %}
+          <div class="artwork-thumb" style="aspect-ratio:1;overflow:hidden;">
+            <img
+              src="{{ artwork.preview_public_url }}"
+              alt="{{ artwork.title }} — DarkForge Art preview"
+              loading="lazy"
+              style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease;"
+            >
+          </div>
+          {% endif %}
+          <div style="padding:1.25rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
+              <span class="text-upper text-muted" style="font-size:0.7rem;">{{ artwork.get_style_display }}</span>
+              {% for tag in artwork.tags.all|slice:":2" %}
+              <span style="font-size:0.7rem;color:var(--color-accent-light);">#{{ tag.name }}</span>
+              {% endfor %}
+            </div>
+            <h3 style="font-size:1.1rem;">{{ artwork.title }}</h3>
+          </div>
+        </a>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ─── Latest Works ─────────────────────────────────────────── #}
+{% if latest_artworks %}
+<section style="border-top:1px solid var(--color-border);">
+  <div class="container">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2.5rem;">
+      <div>
+        <p class="text-upper text-muted" style="margin-bottom:0.5rem;">Fresh Off the Board</p>
+        <h2>Latest Works</h2>
+      </div>
+      <a href="{% url 'gallery:gallery' %}" class="btn btn-ghost">All Works →</a>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;">
+      {% for artwork in latest_artworks %}
+      <a href="{% url 'gallery:artwork_detail' artwork.slug %}" style="display:block;aspect-ratio:1;overflow:hidden;position:relative;">
+        {% if artwork.preview_public_url %}
+        <img
+          src="{{ artwork.preview_public_url }}"
+          alt="{{ artwork.title }}"
+          loading="lazy"
+          style="width:100%;height:100%;object-fit:cover;filter:brightness(0.85);transition:all 0.4s ease;"
+        >
+        {% else %}
+        <div style="width:100%;height:100%;background:var(--color-surface);display:flex;align-items:center;justify-content:center;">
+          <span class="text-faint" style="font-family:var(--font-display);">{{ artwork.title }}</span>
+        </div>
+        {% endif %}
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:0.75rem;background:linear-gradient(to top,rgba(0,0,0,0.9),transparent);">
+          <p style="font-size:0.8rem;font-weight:600;color:white;font-family:var(--font-display);">{{ artwork.title }}</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ─── Commission CTA ───────────────────────────────────────── #}
+<section style="border-top:1px solid var(--color-border);background:var(--color-surface);" class="full-bleed">
+  <div class="container" style="padding-top:5rem;padding-bottom:5rem;text-align:center;">
+    <p class="text-upper text-accent" style="margin-bottom:1rem;">Custom Work</p>
+    <h2 style="max-width:20ch;margin:0 auto 1.5rem;">
+      Want Something Made Just for You?
+    </h2>
+    <p style="color:var(--color-text-muted);max-width:56ch;margin:0 auto 2.5rem;font-size:1.05rem;">
+      Commission a unique piece — from personal artwork to commercial designs.
+      Every piece begins with a pencil and ends as a masterwork.
+    </p>
+    <a href="{% url 'commissions:commission_request' %}" class="btn btn-primary btn-lg">Request a Commission</a>
+  </div>
+</section>
+
+<style>
+.artwork-card:hover img { transform: scale(1.06); }
+</style>
+
+{% endblock %}

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Order Confirmed — {{ order.order_number }}</title>
+</head>
+<body style="background-color:#0a0a0a;color:#e8e4dc;font-family:sans-serif;padding:20px;">
+  <div style="max-width:600px;margin:0 auto;background:#141414;border:1px solid #262626;padding:30px;">
+    <h2 style="color:#b91c1c;margin-top:0;">ORDER CONFIRMED</h2>
+    <p>Thank you for your order with <strong>{{ platform }}</strong>!</p>
+    <p><strong>Order Number:</strong> {{ order.order_number }}<br>
+       <strong>Total:</strong> KES {{ order.total_amount|floatformat:0 }}</p>
+    <hr style="border-color:#262626;margin:20px 0;">
+    <h3>Items Purchased:</h3>
+    <ul>
+      {% for item in order.items.all %}
+      <li>{{ item.product.title }} &times; {{ item.quantity }}</li>
+      {% endfor %}
+    </ul>
+    <p style="margin-top:30px;font-size:0.85em;color:#888;">DarkForge Art — Exclusive Dark &amp; Metal Artwork</p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section>
+  <div class="container">
+    <div style="margin-bottom:2rem;">
+      <p class="text-upper text-muted" style="margin-bottom:0.4rem;">My Commissions</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+        <h1 style="font-size:1.5rem;">Commission History</h1>
+        <a href="{% url 'commissions:commission_request' %}" class="btn btn-primary btn-sm">+ New Commission</a>
+      </div>
+    </div>
+
+    {% if commissions %}
+    <div style="display:flex;flex-direction:column;gap:0;border-top:1px solid var(--color-border);">
+      {% for commission in commissions %}
+      <a href="{% url 'commissions:commission_detail' commission.pk %}"
+         style="display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:center;padding:1.25rem 0;border-bottom:1px solid var(--color-border);">
+        <div>
+          <p style="font-family:var(--font-display);font-size:0.95rem;color:var(--color-white);margin-bottom:0.25rem;">{{ commission.title }}</p>
+          <p style="font-size:0.8rem;color:var(--color-text-muted);">{{ commission.get_tier_display }} &bull; {{ commission.created_at|date:"M j, Y" }}</p>
+          {% if commission.quoted_price %}
+          <p style="font-size:0.8rem;color:var(--color-text-muted);margin-top:0.15rem;">Quote: KES {{ commission.quoted_price|floatformat:0 }}</p>
+          {% endif %}
+        </div>
+        <span style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:{% if commission.status == 'completed' %}#22c55e{% elif commission.status == 'cancelled' %}var(--color-accent-light){% else %}var(--color-accent-light){% endif %};">
+          {{ commission.get_status_display }}
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="border:1px solid var(--color-border);padding:3rem;text-align:center;color:var(--color-text-muted);">
+      <p style="font-family:var(--font-display);font-size:1.2rem;margin-bottom:1rem;">No commissions yet.</p>
+      <a href="{% url 'commissions:commission_request' %}" class="btn btn-primary">Request Your First Commission</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

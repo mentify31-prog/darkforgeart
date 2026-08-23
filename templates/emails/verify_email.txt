@@ -1,0 +1,11 @@
+Hello {{ user.first_name|default:"there" }},
+
+Please verify your email address to activate your DarkForge Art account.
+
+Click the link below (valid for 7 days):
+{{ verify_url }}
+
+If you did not create this account, you can ignore this email.
+
+DarkForge Art
+{{ BASE_URL }}

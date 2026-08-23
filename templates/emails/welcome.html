@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Welcome to DarkForge Art</title>
+</head>
+<body style="background:#0a0a0a;color:#e8e4dc;font-family:'Inter',system-ui,sans-serif;margin:0;padding:40px 20px;">
+  <div style="max-width:560px;margin:0 auto;">
+    <h1 style="font-family:Georgia,serif;font-size:1.8rem;color:#ffffff;margin-bottom:0.5rem;">DarkForge Art</h1>
+    <hr style="border:none;border-top:1px solid #222;margin:1.5rem 0;">
+    <h2 style="font-family:Georgia,serif;font-size:1.3rem;color:#ffffff;margin-bottom:1rem;">Welcome, {{ user.first_name|default:"Artist" }}.</h2>
+    <p style="color:#888880;line-height:1.7;margin-bottom:1.5rem;">
+      Your account is ready. Browse the gallery, request a custom commission, or pick up a piece from the shop.
+    </p>
+    <a href="{{ BASE_URL }}/gallery/"
+       style="display:inline-block;background:#b91c1c;color:#ffffff;padding:12px 28px;text-decoration:none;font-size:0.875rem;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:2rem;">
+      Explore the Gallery
+    </a>
+    <hr style="border:none;border-top:1px solid #222;margin:1.5rem 0;">
+    <p style="color:#444;font-size:0.8rem;">DarkForge Art &bull; {{ BASE_URL }}</p>
+  </div>
+</body>
+</html>

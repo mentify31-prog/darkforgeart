@@ -1,0 +1,9 @@
+Your commission request has been quoted!
+
+Commission ID: #{{ commission.pk }}
+Quote Amount: KES {{ commission.quoted_price|floatformat:0 }}
+
+Review and accept your quote here:
+{{ commission_url }}
+
+DarkForge Art

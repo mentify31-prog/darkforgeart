@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Commissions — Admin Panel{% endblock %}
+
+{% block content %}
+<section>
+  <div class="container">
+    <div style="margin-bottom:2rem;">
+      <a href="{% url 'accounts:admin_dashboard' %}" style="font-size:0.8rem;color:var(--color-text-muted);">← Admin Dashboard</a>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2.5rem;">
+      <div>
+        <p class="text-upper text-accent" style="margin-bottom:0.4rem;">Admin Panel</p>
+        <h1 style="font-size:1.75rem;">All Commissions</h1>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <a href="{% url 'commissions:admin_commissions_list' %}"
+           style="padding:0.4rem 1rem;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;border:1px solid {% if not selected_status %}var(--color-white){% else %}var(--color-border){% endif %};color:{% if not selected_status %}var(--color-white){% else %}var(--color-text-muted){% endif %};">
+          All
+        </a>
+        {% for val, label in status_choices %}
+        <a href="{% url 'commissions:admin_commissions_list' %}?status={{ val }}"
+           style="padding:0.4rem 1rem;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;border:1px solid {% if selected_status == val %}var(--color-accent){% else %}var(--color-border){% endif %};color:{% if selected_status == val %}var(--color-accent-light){% else %}var(--color-text-muted){% endif %};">
+          {{ label }}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if commissions %}
+    <div style="display:flex;flex-direction:column;gap:0;border-top:1px solid var(--color-border);">
+      {% for commission in commissions %}
+      <a href="{% url 'commissions:admin_commission_detail' commission.pk %}"
+         style="display:grid;grid-template-columns:1fr auto;gap:1.5rem;align-items:center;padding:1.25rem 0;border-bottom:1px solid var(--color-border);">
+        <div>
+          <p style="font-family:var(--font-display);font-size:1rem;color:var(--color-white);margin-bottom:0.25rem;">{{ commission.title }}</p>
+          <p style="font-size:0.8rem;color:var(--color-text-muted);">Client: {{ commission.client.get_full_name|default:commission.client.email }} &bull; {{ commission.created_at|date:"M j, Y" }}</p>
+          {% if commission.quoted_price %}
+          <p style="font-size:0.8rem;color:var(--color-accent-light);margin-top:0.15rem;">Quoted: KES {{ commission.quoted_price|floatformat:0 }}</p>
+          {% endif %}
+        </div>
+        <span style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;border:1px solid var(--color-border);padding:0.4rem 0.75rem;color:var(--color-accent-light);">
+          {{ commission.get_status_display }}
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="border:1px solid var(--color-border);padding:3rem;text-align:center;color:var(--color-text-muted);">
+      No commissions matching this status.
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

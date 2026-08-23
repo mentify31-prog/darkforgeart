@@ -1,0 +1,13 @@
+Hello {{ user.first_name|default:"there" }},
+
+Welcome to DarkForge Art!
+
+Your account has been created. You can now:
+- Browse and purchase original dark artwork
+- Request custom commissions
+- Track your orders
+
+Sign in at: {{ BASE_URL }}/accounts/login/
+
+Thank you for joining,
+The DarkForge Art Team

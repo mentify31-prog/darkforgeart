@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section>
+  <div class="container" style="max-width:680px;">
+    <div style="margin-bottom:2.5rem;">
+      <p class="text-upper text-muted" style="margin-bottom:0.4rem;">Custom Artwork</p>
+      <h1 style="font-size:1.75rem;">Request a Commission</h1>
+      <p style="color:var(--color-text-muted);margin-top:0.75rem;max-width:50ch;">
+        Tell us what you want created. We'll review your request and send you a quote within 48 hours.
+      </p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      <div style="border:1px solid var(--color-border);padding:2rem;margin-bottom:1.5rem;">
+        <h3 style="font-size:0.9rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);margin-bottom:1.5rem;">Commission Details</h3>
+        {% for field in form %}
+        {% if field.name not in "sketch_upload reference_0 reference_1 reference_2" %}
+        <div class="form-group">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<p style="font-size:0.75rem;color:var(--color-text-faint);margin-top:0.3rem;">{{ field.help_text }}</p>{% endif %}
+          {% if field.errors %}<p class="form-error">{{ field.errors.0 }}</p>{% endif %}
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+
+      <div style="border:1px solid var(--color-border);padding:2rem;margin-bottom:1.5rem;">
+        <h3 style="font-size:0.9rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);margin-bottom:1.5rem;">Reference Images (Optional)</h3>
+        <p style="font-size:0.875rem;color:var(--color-text-muted);margin-bottom:1.5rem;">
+          Upload your sketch or reference images that will help us understand your vision.
+        </p>
+        <div class="form-group">
+          <label>Your Sketch (optional)</label>
+          <input type="file" name="sketch_upload" accept="image/*">
+        </div>
+        <div class="form-group">
+          <label>Reference Image 1</label>
+          <input type="file" name="reference_0" accept="image/*">
+        </div>
+        <div class="form-group">
+          <label>Reference Image 2</label>
+          <input type="file" name="reference_1" accept="image/*">
+        </div>
+        <div class="form-group">
+          <label>Reference Image 3</label>
+          <input type="file" name="reference_2" accept="image/*">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg">Submit Commission Request</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

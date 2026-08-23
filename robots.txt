@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /django-admin/
+Disallow: /accounts/admin-panel/
+Disallow: /payments/webhook/
+Disallow: /fulfillment/
+Disallow: /orders/download/
+Disallow: /accounts/verify-email/
+Disallow: /accounts/password-reset/
+
+Sitemap: https://darkforgeart.com/sitemap.xml

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About the Artist — DarkForge Art{% endblock %}
+
+{% block content %}
+<section style="padding-top:3rem;">
+  <div class="container" style="max-width:860px;">
+    <div style="margin-bottom:3rem;text-align:center;">
+      <div style="margin-bottom:1.5rem;">
+        <img src="{% static 'img/logo.png' %}" alt="DarkForge Art Brand Emblem" style="max-width:180px;height:auto;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5));">
+      </div>
+      <p class="text-upper text-accent" style="margin-bottom:0.5rem;">The Creative Journey</p>
+      <h1 style="font-size:2.5rem;margin-bottom:1rem;">About DarkForge Art</h1>
+      <p style="color:var(--color-text-muted);font-size:1.1rem;max-width:60ch;margin:0 auto;">
+        Forging dark, graffiti-inspired artwork from raw pencil sketches into digital masterworks and wearable art.
+      </p>
+    </div>
+
+    {# Story Grid #}
+    <div style="display:flex;flex-direction:column;gap:3rem;">
+      <div style="border:1px solid var(--color-border);padding:2.5rem;background:var(--color-surface);">
+        <h2 style="font-size:1.5rem;margin-bottom:1rem;color:var(--color-white);">From Pencil to Digital Forge</h2>
+        <p style="color:var(--color-text-muted);line-height:1.8;margin-bottom:1rem;">
+          At the core of <strong>DarkForge Art</strong> is the raw power of original hand-drawn artwork. Every concept begins on paper with graphite and ink — capturing intricate skulls, gothic motifs, cyberpunk elements, and street-graffiti energy.
+        </p>
+        <p style="color:var(--color-text-muted);line-height:1.8;">
+          Once the pencil scan is complete, it enters the digital forge: enhanced with AI-assisted vectorization and coloring to create vivid, high-contrast pieces that preach artistic power and elegance.
+        </p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+        <div style="border:1px solid var(--color-border);padding:2rem;background:var(--color-surface);">
+          <h3 style="font-size:1.1rem;margin-bottom:0.75rem;color:var(--color-accent-light);">Original Products & Merch</h3>
+          <p style="color:var(--color-text-muted);font-size:0.95rem;line-height:1.7;">
+            Our shop offers instant high-resolution digital downloads, limited edition signed prints, and print-on-demand merchandise (t-shirts, hoodies, canvases) fulfilled globally through Printful and Printify.
+          </p>
+        </div>
+
+        <div style="border:1px solid var(--color-border);padding:2rem;background:var(--color-surface);">
+          <h3 style="font-size:1.1rem;margin-bottom:0.75rem;color:var(--color-accent-light);">Custom Commissions</h3>
+          <p style="color:var(--color-text-muted);font-size:0.95rem;line-height:1.7;">
+            Looking for something tailored? We work directly with individuals, band management, brands, and creators to deliver custom artwork with multi-stage previews and client approval cycles.
+          </p>
+        </div>
+      </div>
+
+      <div style="text-align:center;padding:2rem 0;">
+        <h3 style="margin-bottom:1.5rem;font-size:1.25rem;">Ready to explore or commission a piece?</h3>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+          <a href="{% url 'gallery:gallery' %}" class="btn btn-primary">Browse Gallery</a>
+          <a href="{% url 'commissions:commission_request' %}" class="btn btn-outline">Request a Commission</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+@media(max-width:700px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr !important; }
+}
+</style>
+{% endblock %}

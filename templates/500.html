@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}500 — DarkForge Art{% endblock %}
+{% block content %}
+<section style="min-height:60vh;display:flex;align-items:center;justify-content:center;text-align:center;">
+  <div>
+    <p style="font-family:var(--font-display);font-size:6rem;color:var(--color-border);line-height:1;">500</p>
+    <h1 style="font-size:1.75rem;margin-bottom:1rem;">Server Error</h1>
+    <p style="color:var(--color-text-muted);margin-bottom:2rem;">Something went wrong on our end. We're looking into it.</p>
+    <a href="{% url 'gallery:home' %}" class="btn btn-primary">Go Home</a>
+  </div>
+</section>
+{% endblock %}

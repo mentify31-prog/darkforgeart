@@ -1,0 +1,15 @@
+Thank you for your order with {{ platform }}!
+
+Order Number: {{ order.order_number }}
+Total Amount: KES {{ order.total_amount|floatformat:0 }}
+
+Your payment has been received and verified. We are processing your order.
+
+Items:
+{% for item in order.items.all %}
+- {{ item.product.title }} x{{ item.quantity }}
+{% endfor %}
+
+If you purchased digital artwork, your download links are accessible under your Account Dashboard on DarkForge Art.
+
+DarkForge Art — Dark & Gothic Digital Art Platform

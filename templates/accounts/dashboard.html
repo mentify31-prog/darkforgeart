@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section>
+  <div class="container">
+    <div style="margin-bottom:2.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <p class="text-upper text-muted" style="margin-bottom:0.4rem;">My Account</p>
+        <h1 style="font-size:1.75rem;">Dashboard</h1>
+      </div>
+      {% if not user.is_email_verified %}
+      <div style="border:1px solid var(--color-accent-dim);padding:0.75rem 1.25rem;font-size:0.875rem;color:var(--color-accent-light);display:flex;align-items:center;gap:1rem;">
+        <span>⚠ Please verify your email address.</span>
+        <a href="{% url 'accounts:resend_verification' %}" style="color:var(--color-white);text-decoration:underline;">Resend link</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:3rem;">
+
+      {# ── Recent Orders ── #}
+      <div>
+        <h3 style="font-size:1rem;margin-bottom:1.25rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);">Recent Orders</h3>
+        {% if recent_orders %}
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+          {% for order in recent_orders %}
+          <a href="{% url 'orders:order_detail' order.order_number %}" style="display:block;border:1px solid var(--color-border);padding:1rem;transition:border-color 0.2s ease;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <p style="font-family:var(--font-display);font-size:0.9rem;color:var(--color-white);margin-bottom:0.25rem;">{{ order.order_number }}</p>
+                <p style="font-size:0.8rem;color:var(--color-text-muted);">{{ order.created_at|date:"M j, Y" }}</p>
+              </div>
+              <div style="text-align:right;">
+                <p style="font-size:0.85rem;color:var(--color-white);">KES {{ order.total_amount|floatformat:0 }}</p>
+                <span style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:{% if order.status == 'paid' or order.status == 'fulfilled' %}#22c55e{% elif order.status == 'cancelled' %}var(--color-accent-light){% else %}var(--color-text-muted){% endif %};">
+                  {{ order.get_status_display }}
+                </span>
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="border:1px solid var(--color-border);padding:2rem;text-align:center;color:var(--color-text-muted);">
+          <p style="margin-bottom:1rem;">No orders yet.</p>
+          <a href="{% url 'store:shop' %}" class="btn btn-outline btn-sm">Browse Shop</a>
+        </div>
+        {% endif %}
+      </div>
+
+      {# ── Active Commissions ── #}
+      <div>
+        <h3 style="font-size:1rem;margin-bottom:1.25rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);">Active Commissions</h3>
+        {% if active_commissions %}
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+          {% for commission in active_commissions %}
+          <a href="{% url 'commissions:commission_detail' commission.pk %}" style="display:block;border:1px solid var(--color-border);padding:1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <p style="font-family:var(--font-display);font-size:0.9rem;color:var(--color-white);margin-bottom:0.25rem;">{{ commission.title }}</p>
+                <p style="font-size:0.8rem;color:var(--color-text-muted);">{{ commission.get_tier_display }}</p>
+              </div>
+              <span style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-accent-light);">
+                {{ commission.get_status_display }}
+              </span>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="border:1px solid var(--color-border);padding:2rem;text-align:center;color:var(--color-text-muted);">
+          <p style="margin-bottom:1rem;">No active commissions.</p>
+          <a href="{% url 'commissions:commission_request' %}" class="btn btn-outline btn-sm">Request Commission</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ── Quick Actions ── #}
+    <div style="border-top:1px solid var(--color-border);padding-top:2rem;display:flex;flex-wrap:wrap;gap:1rem;">
+      <a href="{% url 'accounts:profile' %}" class="btn btn-outline btn-sm">Edit Profile</a>
+      <a href="{% url 'commissions:my_commissions' %}" class="btn btn-ghost btn-sm">All Commissions</a>
+      <a href="{% url 'gallery:gallery' %}" class="btn btn-ghost btn-sm">Browse Gallery</a>
+      <form method="post" action="{% url 'accounts:logout' %}" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--color-text-muted);">Sign Out</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

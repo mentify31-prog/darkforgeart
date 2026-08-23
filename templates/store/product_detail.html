@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section>
+  <div class="container product-detail-grid">
+
+    {# Left: Product Info, Gallery & Size Guide #}
+    <div class="product-detail-main">
+      <p class="text-upper text-muted" style="margin-bottom:0.5rem;">{{ product.get_product_type_display }}</p>
+      <h1 style="margin-bottom:1.5rem;font-size:2rem;line-height:1.2;">{{ product.title }}</h1>
+
+      {# Main Product Mockup / Image #}
+      {% if preview_url %}
+      <div style="margin-bottom:1rem;width:100%;max-width:580px;">
+        <img id="main-product-img" src="{{ preview_url }}" alt="{{ product.title }}" loading="eager"
+             style="width:100%;height:auto;max-height:580px;border:1px solid var(--color-border);border-radius:4px;object-fit:contain;background:var(--color-surface);aspect-ratio:1;">
+        {% if product.product_type == 'digital' %}
+        <p style="font-size:0.7rem;color:var(--color-text-faint);margin-top:0.3rem;">Watermarked preview</p>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {# Multiple Mockup Thumbnails #}
+      {% if mockup_images and mockup_images|length > 1 %}
+      <div style="display:flex;gap:0.6rem;overflow-x:auto;padding-bottom:0.75rem;margin-bottom:2.5rem;max-width:580px;" class="hide-scrollbar">
+        {% for img_src in mockup_images %}
+        <button type="button" onclick="switchMainImage('{{ img_src }}', this)"
+                class="mockup-thumb-btn {% if img_src == preview_url or forloop.first %}active{% endif %}"
+                style="border:1px solid var(--color-border);background:var(--color-surface);padding:2px;cursor:pointer;flex-shrink:0;width:70px;height:70px;border-radius:4px;transition:all 0.2s ease;">
+          <img src="{{ img_src }}" alt="Mockup view {{ forloop.counter }}" style="width:100%;height:100%;object-fit:cover;border-radius:2px;">
+        </button>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {# Full Description & Size Guide Table #}
+      {% if product.description %}
+      <div class="product-description-body">
+        <h3 style="font-family:var(--font-display);font-size:1.1rem;color:var(--color-white);margin-bottom:1rem;border-bottom:1px solid var(--color-border);padding-bottom:0.5rem;">Product Details &amp; Size Guide</h3>
+        <div class="description-content-wrapper">
+          {{ product.description|safe }}
+        </div>
+      </div>
+      {% endif %}
+
+      {# Artwork story & tags (only shown for non-physical products) #}
+      {% if product.product_type != 'physical' %}
+        {% if artwork and artwork.story %}
+        <div style="border-top:1px solid var(--color-border);padding-top:2rem;margin-top:2rem;">
+          <p class="text-upper text-muted" style="margin-bottom:1rem;">The Story</p>
+          <p style="line-height:1.8;">{{ artwork.story }}</p>
+        </div>
+        {% endif %}
+
+        {% if artwork and artwork.tags.all %}
+        <div style="margin-top:2rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+          {% for tag in artwork.tags.all %}
+          <a href="{% url 'gallery:gallery' %}?tag={{ tag.slug }}"
+             style="font-size:0.75rem;color:var(--color-text-muted);border:1px solid var(--color-border);padding:0.25rem 0.6rem;">#{{ tag.name }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      {% endif %}
+    </div>
+
+    {# Right: Purchase Panel Sidebar #}
+    <div class="product-detail-sidebar">
+      <div style="border:1px solid var(--color-border);padding:2rem;background:var(--color-surface);border-radius:4px;">
+        <div style="margin-bottom:1.5rem;">
+          <p id="price-display" style="font-family:var(--font-display);font-size:2rem;color:var(--color-white);margin:0;">${{ product.price_usd|floatformat:2 }}</p>
+          <p style="font-size:0.8rem;color:var(--color-text-muted);margin-top:0.25rem;">{{ product.get_product_type_display }}</p>
+        </div>
+
+        {# Digital details #}
+        {% if product.product_type == 'digital' and product.digital_detail %}
+        <div style="margin-bottom:1.5rem;font-size:0.875rem;color:var(--color-text-muted);">
+          <p><strong style="color:var(--color-white);">Format:</strong> {{ product.digital_detail.file_format }}</p>
+          <p><strong style="color:var(--color-white);">License:</strong> {{ product.digital_detail.get_license_type_display }}</p>
+          {% if product.digital_detail.includes_description %}
+          <p style="margin-top:0.75rem;">{{ product.digital_detail.includes_description }}</p>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        {# Limited edition info #}
+        {% if product.product_type == 'limited' and limited_detail %}
+        <div style="margin-bottom:1.5rem;font-size:0.875rem;">
+          {% if limited_detail.is_sold_out %}
+          <p style="color:var(--color-accent-light);">Sold Out</p>
+          {% else %}
+          <p style="color:var(--color-text-muted);">
+            <strong style="color:var(--color-white);">{{ limited_detail.remaining }}</strong> of {{ limited_detail.edition_size }} remaining
+          </p>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'store:add_to_cart' product.pk %}">
+          {% csrf_token %}
+          {% if variants %}
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label for="variant_id" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted);display:block;margin-bottom:0.4rem;">Select Option (Color / Size)</label>
+            <select name="variant_id" id="variant_id" onchange="updateVariantPrice(this)" style="background:var(--color-bg);color:var(--color-text);border:1px solid var(--color-border);padding:0.65rem;width:100%;font-size:0.875rem;border-radius:2px;">
+              {% for variant in variants %}
+              <option value="{{ variant.pk }}" data-price-usd="{{ variant.effective_price_usd|floatformat:2 }}">
+                {% if variant.color %}{{ variant.color }}{% endif %}
+                {% if variant.size %} / {{ variant.size }}{% endif %}
+                — ${{ variant.effective_price_usd|floatformat:2 }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;">
+            <label for="quantity-select" style="font-size:0.85rem;color:var(--color-text-muted);">Quantity:</label>
+            <select id="quantity-select" name="quantity" onchange="updateTotalPrice(this.value)" style="background:var(--color-bg);color:var(--color-text);border:1px solid var(--color-border);padding:0.4rem 0.75rem;font-size:0.875rem;border-radius:2px;cursor:pointer;min-width:70px;">
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">
+            {% if product.product_type == 'digital' %}Buy &amp; Download{% else %}Add to Cart{% endif %}
+          </button>
+        </form>
+      </div>
+
+      <script>
+      let currentUnitPriceUSD = parseFloat("{{ product.price_usd|floatformat:2 }}");
+
+      function updateVariantPrice(selectEl) {
+        const selectedOpt = selectEl.options[selectEl.selectedIndex];
+        if (selectedOpt && selectedOpt.dataset.priceUsd) {
+          currentUnitPriceUSD = parseFloat(selectedOpt.dataset.priceUsd);
+        }
+        const qty = parseInt(document.getElementById("quantity-select").value || 1);
+        updateTotalPrice(qty);
+      }
+
+      function updateTotalPrice(qty) {
+        const total = (currentUnitPriceUSD * parseInt(qty)).toFixed(2);
+        const priceEl = document.getElementById("price-display");
+        if (priceEl) {
+          priceEl.textContent = "$" + total;
+        }
+      }
+
+      function switchMainImage(imgUrl, btnEl) {
+        const mainImg = document.getElementById("main-product-img");
+        if (mainImg) {
+          mainImg.src = imgUrl;
+        }
+        document.querySelectorAll('.mockup-thumb-btn').forEach(b => b.classList.remove('active'));
+        if (btnEl) {
+          btnEl.classList.add('active');
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function() {
+        const variantSelect = document.getElementById("variant_id");
+        if (variantSelect) {
+          updateVariantPrice(variantSelect);
+        }
+      });
+      </script>
+
+      {# Back to artwork #}
+      {% if artwork %}
+      <div style="margin-top:1.25rem;text-align:center;">
+        <a href="{% url 'gallery:artwork_detail' artwork.slug %}" style="font-size:0.8rem;color:var(--color-text-muted);">
+          ← View Original Artwork Portfolio
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</section>
+
+<style>
+.product-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 3.5rem;
+  align-items: start;
+  padding-top: 2rem;
+  width: 100%;
+}
+
+.product-detail-main {
+  min-width: 0;
+  width: 100%;
+}
+
+.product-detail-sidebar {
+  position: sticky;
+  top: calc(var(--nav-height) + 2rem);
+  width: 100%;
+}
+
+.product-description-body {
+  width: 100%;
+  margin-bottom: 2.5rem;
+  color: var(--color-text);
+  line-height: 1.8;
+}
+
+.description-content-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.product-description-body table {
+  width: 100% !important;
+  max-width: 100% !important;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.85rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.product-description-body th,
+.product-description-body td {
+  padding: 0.6rem 0.85rem;
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.product-description-body th {
+  background: var(--color-bg);
+  color: var(--color-white);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.mockup-thumb-btn.active {
+  border-color: var(--color-white) !important;
+  outline: 2px solid var(--color-accent);
+}
+
+@media (max-width: 960px) {
+  .product-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .product-detail-sidebar {
+    position: static;
+  }
+}
+</style>
+{% endblock %}

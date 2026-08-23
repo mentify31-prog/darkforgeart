@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section>
+  <div class="container">
+    <div style="margin-bottom:2.5rem;">
+      <p class="text-upper text-muted" style="margin-bottom:0.5rem;">The Shop</p>
+      <h1>All Works</h1>
+    </div>
+
+    {# Type filter #}
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:3rem;">
+      <a href="{% url 'store:shop' %}"
+         style="padding:0.4rem 1rem;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;border:1px solid {% if not selected_type %}var(--color-white){% else %}var(--color-border){% endif %};color:{% if not selected_type %}var(--color-white){% else %}var(--color-text-muted){% endif %};">
+        All
+      </a>
+      {% for val, label in product_types %}
+      <a href="{% url 'store:shop' %}?type={{ val }}"
+         style="padding:0.4rem 1rem;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;border:1px solid {% if selected_type == val %}var(--color-accent){% else %}var(--color-border){% endif %};color:{% if selected_type == val %}var(--color-accent-light){% else %}var(--color-text-muted){% endif %};">
+        {{ label }}
+      </a>
+      {% endfor %}
+    </div>
+
+    {% if products %}
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;">
+      {% for product in products %}
+      <article style="border:1px solid var(--color-border);background:var(--color-surface);">
+        <a href="{% url 'store:product_detail' product.slug %}" style="display:block;">
+          {% if product.preview_url %}
+          <div style="aspect-ratio:1;overflow:hidden;">
+            <img src="{{ product.preview_url }}" alt="{{ product.title }}" loading="lazy"
+                 style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;">
+          </div>
+          {% endif %}
+          <div style="padding:1.25rem;">
+            <p class="text-upper text-muted" style="font-size:0.7rem;margin-bottom:0.25rem;">{{ product.get_product_type_display }}</p>
+            <h3 style="font-size:1rem;margin-bottom:0.75rem;">{{ product.title }}</h3>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-family:var(--font-display);font-size:1.15rem;color:var(--color-white);">${{ product.price_usd|floatformat:2 }}</span>
+              {% if product.product_type == 'limited' and product.limited_detail %}
+              <span style="font-size:0.7rem;color:var(--color-accent-light);">{{ product.limited_detail.remaining }} left</span>
+              {% endif %}
+            </div>
+          </div>
+        </a>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:5rem 0;color:var(--color-text-muted);">
+      <p style="font-size:1.25rem;font-family:var(--font-display);margin-bottom:1rem;">No products found.</p>
+      <a href="{% url 'store:shop' %}" class="btn btn-outline">Clear filter</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<style>article:hover img { transform:scale(1.05); }</style>
+{% endblock %}

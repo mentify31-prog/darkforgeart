@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard — DarkForge Art{% endblock %}
+
+{% block content %}
+<section>
+  <div class="container">
+    <div style="margin-bottom:2.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <p class="text-upper text-accent" style="margin-bottom:0.4rem;">Platform Administration</p>
+        <h1 style="font-size:1.75rem;">Admin Dashboard</h1>
+      </div>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+        <a href="/django-admin/" class="btn btn-outline btn-sm" target="_blank">Django Admin Panel ↗</a>
+        <a href="{% url 'commissions:admin_commissions_list' %}" class="btn btn-primary btn-sm">Manage Commissions</a>
+      </div>
+    </div>
+
+    {# ── Key Metrics Grid ── #}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-bottom:3rem;">
+      <div style="border:1px solid var(--color-border);padding:1.5rem;background:var(--color-surface);">
+        <p class="text-upper text-muted" style="font-size:0.75rem;margin-bottom:0.5rem;">Monthly Revenue</p>
+        <p style="font-family:var(--font-display);font-size:1.75rem;color:var(--color-white);">KES {{ monthly_revenue|floatformat:0 }}</p>
+      </div>
+
+      <div style="border:1px solid var(--color-border);padding:1.5rem;background:var(--color-surface);">
+        <p class="text-upper text-muted" style="font-size:0.75rem;margin-bottom:0.5rem;">Total Orders</p>
+        <p style="font-family:var(--font-display);font-size:1.75rem;color:var(--color-white);">{{ total_orders }}</p>
+        {% if pending_orders %}
+        <p style="font-size:0.8rem;color:var(--color-accent-light);margin-top:0.25rem;">{{ pending_orders }} pending</p>
+        {% endif %}
+      </div>
+
+      <div style="border:1px solid var(--color-border);padding:1.5rem;background:var(--color-surface);">
+        <p class="text-upper text-muted" style="font-size:0.75rem;margin-bottom:0.5rem;">Pending Commissions</p>
+        <p style="font-family:var(--font-display);font-size:1.75rem;color:var(--color-accent-light);">{{ pending_commissions|length }}</p>
+      </div>
+
+      <div style="border:1px solid var(--color-border);padding:1.5rem;background:var(--color-surface);">
+        <p class="text-upper text-muted" style="font-size:0.75rem;margin-bottom:0.5rem;">Registered Customers</p>
+        <p style="font-family:var(--font-display);font-size:1.75rem;color:var(--color-white);">{{ total_customers }}</p>
+      </div>
+    </div>
+
+    {# ── Main Tables Grid ── #}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+
+      {# Recent Orders #}
+      <div>
+        <h3 style="font-size:1rem;margin-bottom:1.25rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);">Recent Orders</h3>
+        {% if recent_orders %}
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+          {% for order in recent_orders %}
+          <div style="border:1px solid var(--color-border);padding:1rem;background:var(--color-surface);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <p style="font-family:var(--font-display);font-size:0.9rem;color:var(--color-white);margin-bottom:0.25rem;">
+                  <a href="{% url 'orders:order_detail' order.order_number %}">{{ order.order_number }}</a>
+                </p>
+                <p style="font-size:0.8rem;color:var(--color-text-muted);">{{ order.shipping_name }} &bull; {{ order.created_at|date:"M j, H:i" }}</p>
+              </div>
+              <div style="text-align:right;">
+                <p style="font-size:0.85rem;color:var(--color-white);">KES {{ order.total_amount|floatformat:0 }}</p>
+                <span style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:{% if order.status == 'paid' or order.status == 'fulfilled' %}#22c55e{% else %}var(--color-text-muted){% endif %};">
+                  {{ order.get_status_display }}
+                </span>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="border:1px solid var(--color-border);padding:2rem;text-align:center;color:var(--color-text-muted);">
+          No orders yet.
+        </div>
+        {% endif %}
+      </div>
+
+      {# Pending Commissions #}
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+          <h3 style="font-size:1rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);">Commission Requests</h3>
+          <a href="{% url 'commissions:admin_commissions_list' %}" style="font-size:0.8rem;color:var(--color-accent-light);">View All →</a>
+        </div>
+        {% if pending_commissions %}
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+          {% for commission in pending_commissions %}
+          <div style="border:1px solid var(--color-border);padding:1rem;background:var(--color-surface);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div>
+                <p style="font-family:var(--font-display);font-size:0.9rem;color:var(--color-white);margin-bottom:0.25rem;">
+                  <a href="{% url 'commissions:admin_commission_detail' commission.pk %}">{{ commission.title }}</a>
+                </p>
+                <p style="font-size:0.8rem;color:var(--color-text-muted);">Client: {{ commission.client.get_full_name|default:commission.client.email }}</p>
+              </div>
+              <span style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-accent-light);">
+                {{ commission.get_status_display }}
+              </span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="border:1px solid var(--color-border);padding:2rem;text-align:center;color:var(--color-text-muted);">
+          No pending commission requests.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+@media(max-width:800px) {
+  .container > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr !important; }
+}
+</style>
+{% endblock %}
