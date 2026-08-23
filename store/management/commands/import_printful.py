@@ -73,18 +73,101 @@ class Command(BaseCommand):
             if not sync_vars:
                 continue
 
-            first_retail = float(sync_vars[0].get("retail_price", 30.0))
+            SHIPPING_BUFFER_USD = 13.00
+            first_retail = float(sync_vars[0].get("retail_price", 30.0)) + SHIPPING_BUFFER_USD
             base_price_kes = round(first_retail * rate, 2)
 
+            # ---------------------------------------------------------------
+            # MOCKUP IMAGES (Automated Mockup Generator)
+            # 1) Start with thumbnail from sync_product
+            # 2) Call Printful Mockup Generator API to render ALL mockup views
+            #    (Front, Back, Bottom, Side, Lifestyle, etc.)
+            # 3) Fallback to sync variant preview files if generator fails
+            # NEVER expose raw print files / artwork files.
+            # ---------------------------------------------------------------
             all_mockups = []
             if thumbnail:
                 all_mockups.append(thumbnail)
 
+            # Build files payload with proper position bounding boxes
+            files_payload = []
+            seen_placements = set()
             for sv in sync_vars:
                 for f in sv.get("files", []):
-                    p_url = f.get("preview_url")
-                    if p_url and p_url not in all_mockups:
-                        all_mockups.append(p_url)
+                    ftype = f.get("type")
+                    if ftype and ftype != "preview":
+                        placement = ftype
+                        if placement == "default":
+                            placement = "front"
+                        if placement in seen_placements:
+                            continue
+                        seen_placements.add(placement)
+
+                        url = f.get("preview_url") or f.get("url")
+                        w = f.get("width") or 2100
+                        h = f.get("height") or 2850
+                        if url:
+                            files_payload.append({
+                                "placement": placement,
+                                "image_url": url,
+                                "position": {
+                                    "area_width": w,
+                                    "area_height": h,
+                                    "width": w,
+                                    "height": h,
+                                    "top": 0,
+                                    "left": 0,
+                                }
+                            })
+
+            catalog_product_id = None
+            catalog_variant_id = None
+            if sync_vars:
+                prod_info = sync_vars[0].get("product", {})
+                catalog_product_id = prod_info.get("product_id")
+                catalog_variant_id = prod_info.get("variant_id")
+
+            if catalog_product_id and catalog_variant_id and files_payload:
+                try:
+                    import time
+                    payload = {
+                        "variant_ids": [catalog_variant_id],
+                        "format": "jpg",
+                        "files": files_payload,
+                    }
+                    path = f"mockup-generator/create-task/{catalog_product_id}?store_id={provider.store_id}"
+                    sc, task_res = provider._post(path, payload)
+                    if sc in (200, 201):
+                        task_key = task_res.get("result", {}).get("task_key")
+                        if task_key:
+                            for _attempt in range(12):
+                                time.sleep(2)
+                                poll = provider._get("mockup-generator/task", params={"task_key": task_key})
+                                poll_res = poll.get("result", {}) if isinstance(poll, dict) else {}
+                                status = poll_res.get("status")
+                                if status == "completed":
+                                    for m in poll_res.get("mockups", []):
+                                        m_url = m.get("mockup_url")
+                                        if m_url and m_url not in all_mockups:
+                                            all_mockups.append(m_url)
+                                        for em in m.get("extra_mockups", []):
+                                            em_url = em.get("mockup_url")
+                                            if em_url and em_url not in all_mockups:
+                                                all_mockups.append(em_url)
+                                    break
+                                elif status == "failed":
+                                    break
+                except Exception as exc:
+                    self.stderr.write(self.style.WARNING(f"Mockup generator failed for {p_name}: {exc}"))
+
+            # Fallback to variant preview files if generator failed
+            if len(all_mockups) <= 1:
+                for sv in sync_vars:
+                    for f in sv.get("files", []):
+                        if f.get("type") in ("preview", "mockup"):
+                            p_url = f.get("preview_url") or f.get("url")
+                            if p_url and p_url not in all_mockups:
+                                all_mockups.append(p_url)
 
             default_mockup = all_mockups[0] if all_mockups else ""
 
@@ -137,7 +220,7 @@ class Command(BaseCommand):
                         else:
                             color = color or spec
 
-                variant_price_usd = float(sv.get("retail_price", first_retail))
+                variant_price_usd = float(sv.get("retail_price", first_retail)) + SHIPPING_BUFFER_USD
                 variant_price_kes = round(variant_price_usd * rate, 2)
 
                 var_obj, _ = ProductVariant.objects.get_or_create(

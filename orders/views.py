@@ -55,9 +55,6 @@ def checkout(request):
         if product.product_type == ProductType.PHYSICAL:
             requires_shipping = True
 
-        rate = getattr(settings, "USD_EXCHANGE_RATE", 130.0) or 130.0
-        subtotal_usd = round(float(subtotal) / rate, 2)
-
         cart_items.append({
             "key": key,
             "product": product,
@@ -65,16 +62,35 @@ def checkout(request):
             "quantity": quantity,
             "unit_price": unit_price,
             "subtotal": subtotal,
-            "subtotal_usd": subtotal_usd,
+            "preview_url": product.preview_url,
         })
 
     rate = getattr(settings, "USD_EXCHANGE_RATE", 130.0) or 130.0
-    total_usd = round(float(total) / rate, 2)
+
+    # Annotate each cart item with a USD subtotal now that rate is in scope
+    for item in cart_items:
+        item["subtotal_usd"] = round(float(item["subtotal"]) / rate, 2)
+
+    subtotal_usd = round(float(total) / rate, 2)
+
+    from .shipping import calculate_cart_shipping
+
+    selected_country = request.GET.get("country_code", "US").upper().strip()
+    shipping_usd, shipping_kes, shipping_label = calculate_cart_shipping(cart_items, selected_country)
+
+    total_with_shipping = float(total) + shipping_kes
+    total_usd_with_shipping = round(float(total_with_shipping) / rate, 2)
 
     context = {
         "cart_items": cart_items,
-        "total": total,
-        "total_usd": total_usd,
+        "subtotal": total,
+        "subtotal_usd": subtotal_usd,
+        "shipping_usd": shipping_usd,
+        "shipping_kes": shipping_kes,
+        "shipping_label": shipping_label,
+        "total": total_with_shipping,
+        "total_usd": total_usd_with_shipping,
+        "selected_country": selected_country,
         "requires_shipping": requires_shipping,
         "PAYSTACK_PUBLIC_KEY": settings.PAYSTACK_PUBLIC_KEY,
         "page_title": "Checkout - DarkForge Art",

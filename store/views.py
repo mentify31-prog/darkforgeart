@@ -30,16 +30,6 @@ def shop(request):
 
     products = products.order_by("-created_at")
 
-    # Attach preview URLs - use Printify mockup for physical products
-    for product in products:
-        phys = getattr(product, "physical_detail", None)
-        if phys and phys.mockup_image_url:
-            product.preview_url = phys.mockup_image_url
-        elif product.artwork:
-            product.preview_url = product.artwork.get_preview_public_url()
-        else:
-            product.preview_url = None
-
     context = {
         "products": products,
         "product_types": ProductType.choices,
@@ -132,7 +122,7 @@ def cart(request):
             "unit_price": unit_price,
             "subtotal": subtotal,
             "subtotal_usd": subtotal_usd,
-            "preview_url": product.artwork.get_preview_public_url(),
+            "preview_url": product.preview_url,
         })
 
     total_usd = round(float(total) / (getattr(settings, "USD_EXCHANGE_RATE", 130.0) or 130.0), 2)

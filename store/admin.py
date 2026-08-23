@@ -1,6 +1,7 @@
 """
 store/admin.py
 """
+from django import forms
 from django.contrib import admin
 from django.urls import path
 from django.shortcuts import redirect
@@ -15,6 +16,7 @@ from .models import (
     LicenseProduct,
     ProductType,
 )
+from .services import upload_product_mockup_files
 
 
 class DigitalProductInline(admin.StackedInline):
@@ -22,8 +24,38 @@ class DigitalProductInline(admin.StackedInline):
     extra = 0
 
 
+class MultipleFileInput(forms.FileInput):
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput(attrs={"multiple": True}))
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = [single_file_clean(data, initial)]
+        return result
+
+
+class PhysicalProductAdminForm(forms.ModelForm):
+    upload_extra_mockups = MultipleFileField(
+        required=False,
+        help_text="Select one or multiple mockup images (PNG/JPG) from your computer to upload directly to your GitHub repository and display in the product gallery carousel.",
+    )
+
+    class Meta:
+        model = PhysicalProduct
+        fields = "__all__"
+
+
 class PhysicalProductInline(admin.StackedInline):
     model = PhysicalProduct
+    form = PhysicalProductAdminForm
     extra = 0
 
 
@@ -44,8 +76,21 @@ class LicenseProductInline(admin.StackedInline):
 
 @admin.register(PhysicalProduct)
 class PhysicalProductAdmin(admin.ModelAdmin):
+    form = PhysicalProductAdminForm
     list_display = ["product", "fulfillment_provider", "printful_product_id", "printify_product_id"]
     inlines = [PhysicalProductVariantInline]
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        files = request.FILES.getlist("upload_extra_mockups")
+        if files:
+            urls = upload_product_mockup_files(obj, files)
+            if urls:
+                self.message_user(
+                    request,
+                    f"Successfully uploaded {len(urls)} custom mockup image(s) to GitHub repository and added to product!",
+                    messages.SUCCESS,
+                )
 
 
 @admin.register(Product)
@@ -120,3 +165,21 @@ class ProductAdmin(admin.ModelAdmin):
             ProductType.LICENSE: [LicenseProductInline],
         }
         return inline_map.get(obj.product_type, [])
+
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save()
+        for instance in instances:
+            if isinstance(instance, PhysicalProduct):
+                # Look for files uploaded in the inline form
+                prefix = formset.prefix
+                files = request.FILES.getlist(f"{prefix}-0-upload_extra_mockups")
+                if not files:
+                    files = request.FILES.getlist("upload_extra_mockups")
+                if files:
+                    urls = upload_product_mockup_files(instance, files)
+                    if urls:
+                        self.message_user(
+                            request,
+                            f"Successfully uploaded {len(urls)} custom mockup image(s) to GitHub repository and added to product!",
+                            messages.SUCCESS,
+                        )

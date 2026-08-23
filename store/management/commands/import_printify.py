@@ -39,7 +39,8 @@ class Command(BaseCommand):
             if not enabled_vars:
                 continue
 
-            base_cost_usd = enabled_vars[0].get("price", 0) / 100.0
+            SHIPPING_BUFFER_USD = 9.99
+            base_cost_usd = (enabled_vars[0].get("price", 0) / 100.0) + SHIPPING_BUFFER_USD
             base_price_kes = round(base_cost_usd * rate, 2)
 
             product, created = Product.objects.get_or_create(
@@ -82,7 +83,7 @@ class Command(BaseCommand):
             for v in enabled_vars:
                 v_id = str(v.get("id"))
                 v_title = v.get("title", "")
-                v_cost_usd = v.get("price", 0) / 100.0
+                v_cost_usd = (v.get("price", 0) / 100.0) + SHIPPING_BUFFER_USD
                 v_price_kes = round(v_cost_usd * rate, 2)
 
                 parts = v_title.split("/")

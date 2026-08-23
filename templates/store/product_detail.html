@@ -86,9 +86,32 @@
     <div class="product-detail-sidebar">
       <div style="border:1px solid var(--color-border);padding:2rem;background:var(--color-surface);border-radius:4px;">
         <div style="margin-bottom:1.5rem;">
-          <p id="price-display" style="font-family:var(--font-display);font-size:2rem;color:var(--color-white);margin:0;">${{ product.price_usd|floatformat:2 }}</p>
+          <span style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);display:block;margin-bottom:0.25rem;">Price</span>
+          <div style="font-family:var(--font-display);font-size:2rem;color:var(--color-white);font-weight:700;" id="price-display">
+            ${{ product.price_usd|floatformat:2 }}
+          </div>
           <p style="font-size:0.8rem;color:var(--color-text-muted);margin-top:0.25rem;">{{ product.get_product_type_display }}</p>
         </div>
+
+        {# Free Worldwide Shipping Box #}
+        {% if product.product_type == 'physical' or product.product_type == 'limited' %}
+          <div style="margin-bottom:1.5rem;">
+            <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#2ec4b6;flex-shrink:0;">
+                <rect x="1" y="3" width="15" height="13"></rect>
+                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                <circle cx="18.5" cy="18.5" r="2.5"></circle>
+              </svg>
+              <p style="font-size:0.8rem;font-weight:700;color:var(--color-white);margin:0;">FREE SHIPPING: US, UK, Canada &amp; Europe</p>
+            </div>
+            <p style="font-size:0.75rem;color:var(--color-text-muted);margin:0 0 0.5rem;padding-left:1.6rem;">Shipping is built into the listed price for these regions - what you see is what you pay.</p>
+            <div style="display:flex;align-items:flex-start;gap:0.5rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:0.5rem 0.75rem;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#facc15;flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              <p style="font-size:0.72rem;color:var(--color-text-muted);margin:0;"><strong style="color:var(--color-text-light);">Outside these regions?</strong> A small international freight surcharge applies at checkout for Australia, Japan, Brazil &amp; Africa.</p>
+            </div>
+          </div>
+          {% endif %}
 
         {# Digital details #}
         {% if product.product_type == 'digital' and product.digital_detail %}
@@ -188,8 +211,8 @@
       });
       </script>
 
-      {# Back to artwork #}
-      {% if artwork %}
+      {# Back to artwork (only shown for non-physical products) #}
+      {% if artwork and product.product_type != 'physical' %}
       <div style="margin-top:1.25rem;text-align:center;">
         <a href="{% url 'gallery:artwork_detail' artwork.slug %}" style="font-size:0.8rem;color:var(--color-text-muted);">
           ← View Original Artwork Portfolio

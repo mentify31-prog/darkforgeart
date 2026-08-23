@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block robots %}noindex, follow{% endblock %}
 
@@ -47,18 +48,19 @@
           </div>
           <div class="form-group">
             <label for="country_code">Country</label>
-            <select id="country_code" name="country_code">
-              <option value="KE" selected>Kenya</option>
-              <option value="UG">Uganda</option>
-              <option value="TZ">Tanzania</option>
-              <option value="RW">Rwanda</option>
-              <option value="NG">Nigeria</option>
-              <option value="GH">Ghana</option>
-              <option value="ZA">South Africa</option>
-              <option value="US">United States</option>
-              <option value="GB">United Kingdom</option>
-              <option value="DE">Germany</option>
-              <option value="FR">France</option>
+            <select id="country_code" name="country_code" onchange="location.href='?country_code='+this.value">
+              <option value="US" {% if selected_country == 'US' %}selected{% endif %}>United States (Free Shipping)</option>
+              <option value="GB" {% if selected_country == 'GB' %}selected{% endif %}>United Kingdom (Free Shipping)</option>
+              <option value="CA" {% if selected_country == 'CA' %}selected{% endif %}>Canada (Free Shipping)</option>
+              <option value="DE" {% if selected_country == 'DE' %}selected{% endif %}>Germany (Free Shipping)</option>
+              <option value="FR" {% if selected_country == 'FR' %}selected{% endif %}>France (Free Shipping)</option>
+              <option value="AU" {% if selected_country == 'AU' %}selected{% endif %}>Australia &amp; NZ</option>
+              <option value="JP" {% if selected_country == 'JP' %}selected{% endif %}>Japan</option>
+              <option value="BR" {% if selected_country == 'BR' %}selected{% endif %}>Brazil</option>
+              <option value="KE" {% if selected_country == 'KE' %}selected{% endif %}>Kenya &amp; Rest of Africa</option>
+              <option value="ZA" {% if selected_country == 'ZA' %}selected{% endif %}>South Africa</option>
+              <option value="NG" {% if selected_country == 'NG' %}selected{% endif %}>Nigeria</option>
+              <option value="OTHER" {% if selected_country == 'OTHER' %}selected{% endif %}>Worldwide / Rest of World</option>
             </select>
           </div>
           {% else %}
@@ -80,6 +82,14 @@
               <p style="font-size:0.875rem;color:var(--color-white);">${{ item.subtotal_usd|floatformat:2 }}</p>
             </div>
             {% endfor %}
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;padding-bottom:0.75rem;border-bottom:1px solid var(--color-border);font-size:0.85rem;">
+              <span style="color:var(--color-text-muted);">Delivery &amp; Shipping</span>
+              {% if shipping_usd == 0 %}
+                <span style="color:#2ec4b6;font-weight:600;">FREE (Included)</span>
+              {% else %}
+                <span style="color:var(--color-accent-light);font-weight:600;">+${{ shipping_usd|floatformat:2 }} USD</span>
+              {% endif %}
+            </div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;">
               <strong style="font-family:var(--font-display);">Total</strong>
               <strong style="font-family:var(--font-display);font-size:1.3rem;">${{ total_usd|floatformat:2 }}</strong>
@@ -91,9 +101,35 @@
             Pay ${{ total_usd|floatformat:2 }} Securely →
           </button>
 
-          <p style="font-size:0.75rem;color:var(--color-text-faint);text-align:center;margin-top:1rem;">
-            Secured by Paystack. Card &amp; M-Pesa accepted (approx KES {{ total|floatformat:0 }}).
-          </p>
+          {# Supported Payment Method Badges #}
+          <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-top:1.25rem;flex-wrap:wrap;">
+            {# Visa #}
+            <span style="display:inline-flex;align-items:center;justify-content:center;background:#ffffff;border:1px solid rgba(255,255,255,0.2);border-radius:4px;padding:3px 8px;height:28px;" title="Visa">
+              <svg width="36" height="12" viewBox="0 0 36 12" fill="none">
+                <path d="M13.67 0.28L8.98 11.52H6.01L3.65 2.47C3.51 1.9 3.09 1.34 2.53 1.05C1.65 0.58 0.44 0.16 0 0.05L0.06 0.28H4.94C5.59 0.28 6.15 0.72 6.28 1.41L7.49 8.01L10.45 0.28H13.67ZM25.5 8.16C25.52 5.04 21.14 4.87 21.17 3.48C21.18 3.06 21.58 2.6 22.52 2.48C22.98 2.42 24.28 2.37 25.56 2.96L26.02 0.84C25.39 0.61 24.58 0.4 23.57 0.4C20.67 0.4 18.63 1.94 18.61 4.12C18.59 5.75 20.06 6.66 21.18 7.21C22.33 7.77 22.72 8.13 22.71 8.63C22.7 9.4 21.8 9.74 20.9 9.75C19.45 9.77 18.6 9.36 17.94 9.06L17.46 11.27C18.25 11.63 19.7 11.94 21.2 11.96C24.28 11.96 26.28 10.43 25.5 8.16ZM33.02 11.52H35.81L33.37 0.28H30.8C30.18 0.28 29.66 0.64 29.43 1.19L25.17 11.52H28.26L28.88 9.81H32.65L33.02 11.52ZM29.74 7.42L31.28 3.19L32.16 7.42H29.74ZM18.3 0.28L15.93 11.52H13.06L15.43 0.28H18.3Z" fill="#1434CB"/>
+              </svg>
+            </span>
+            {# Mastercard #}
+            <span style="display:inline-flex;align-items:center;justify-content:center;background:#1a1a1a;border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:3px 8px;height:28px;" title="Mastercard">
+              <svg width="28" height="17" viewBox="0 0 28 16" fill="none">
+                <circle cx="9" cy="8" r="7" fill="#EB001B"/>
+                <circle cx="19" cy="8" r="7" fill="#F79E1B" fill-opacity="0.9"/>
+                <path d="M14 2.82A6.97 6.97 0 0 1 16.58 8 6.97 6.97 0 0 1 14 13.18 6.97 6.97 0 0 1 11.42 8 6.97 6.97 0 0 1 14 2.82Z" fill="#FF5F00"/>
+              </svg>
+            </span>
+            {# AMEX Logo #}
+            <span style="display:inline-flex;align-items:center;justify-content:center;background:#ffffff;border:1px solid rgba(255,255,255,0.2);border-radius:4px;padding:2px 6px;height:28px;" title="American Express">
+              <img src="{% static 'img/amex.png' %}" alt="American Express" style="height:20px;width:auto;object-fit:contain;">
+            </span>
+            {# M-Pesa Logo #}
+            <span style="display:inline-flex;align-items:center;justify-content:center;background:#ffffff;border:1px solid rgba(255,255,255,0.2);border-radius:4px;padding:2px 6px;height:28px;" title="M-Pesa">
+              <img src="{% static 'img/mpesa.png' %}" alt="M-Pesa" style="height:20px;width:auto;object-fit:contain;">
+            </span>
+            {# Airtel Money Logo #}
+            <span style="display:inline-flex;align-items:center;justify-content:center;background:#ffffff;border:1px solid rgba(255,255,255,0.2);border-radius:4px;padding:2px 6px;height:28px;" title="Airtel Money">
+              <img src="{% static 'img/airtel_money.png' %}" alt="Airtel Money" style="height:20px;width:auto;object-fit:contain;">
+            </span>
+          </div>
         </div>
       </div>
     </form>

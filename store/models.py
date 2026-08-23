@@ -108,6 +108,21 @@ class Product(models.Model):
         rate = getattr(settings, "USD_EXCHANGE_RATE", 130.0) or 130.0
         return round(float(self.price) / rate, 2)
 
+    @property
+    def preview_url(self) -> str:
+        """
+        Return the display preview image URL for this product.
+        For physical products, returns the physical product mockup image.
+        For digital/limited products, returns the watermarked artwork preview URL.
+        """
+        if self.product_type == ProductType.PHYSICAL:
+            phys = getattr(self, "physical_detail", None)
+            if phys and phys.mockup_image_url:
+                return phys.mockup_image_url
+        if self.artwork:
+            return self.artwork.get_preview_public_url()
+        return ""
+
     def get_type_detail(self):
         """Return the type-specific sub-object, or None."""
         if self.product_type == ProductType.DIGITAL:

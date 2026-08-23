@@ -78,11 +78,16 @@ def _build_order_from_cart(request, shipping_data: dict) -> Order | None:
     if not line_items:
         return None
 
+    from orders.shipping import calculate_cart_shipping
+    country_code = shipping_data.get("country_code", "US")
+    shipping_usd, shipping_kes, _ = calculate_cart_shipping(line_items, country_code)
+    final_order_total = float(total) + shipping_kes
+
     order = Order.objects.create(
         user=request.user if request.user.is_authenticated else None,
         order_number=generate_order_number(),
         status=Order.Status.PENDING,
-        total_amount=total,
+        total_amount=final_order_total,
         currency=settings.PAYSTACK_CURRENCY,
         shipping_name=shipping_data.get("name", ""),
         shipping_email=shipping_data.get("email", ""),
