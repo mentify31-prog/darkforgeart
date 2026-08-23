@@ -145,9 +145,7 @@
             <select name="variant_id" id="variant_id" onchange="updateVariantPrice(this)" style="background:var(--color-bg);color:var(--color-text);border:1px solid var(--color-border);padding:0.65rem;width:100%;font-size:0.875rem;border-radius:2px;">
               {% for variant in variants %}
               <option value="{{ variant.pk }}" data-price-usd="{{ variant.effective_price_usd|floatformat:2 }}">
-                {% if variant.color %}{{ variant.color }}{% endif %}
-                {% if variant.size %} / {{ variant.size }}{% endif %}
- - ${{ variant.effective_price_usd|floatformat:2 }}
+                {% if variant.color and variant.size %}{{ variant.color }} / {{ variant.size }}{% elif variant.size %}{{ variant.size }}{% elif variant.color %}{{ variant.color }}{% else %}Option {{ forloop.counter }}{% endif %} - ${{ variant.effective_price_usd|floatformat:2 }}
               </option>
               {% endfor %}
             </select>
