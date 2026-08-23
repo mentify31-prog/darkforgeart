@@ -39,7 +39,17 @@ urlpatterns = [
     # SEO
     path("sitemap.xml", sitemap, {"sitemaps": SITEMAPS}, name="django.contrib.sitemaps.views.sitemap"),
     path("robots.txt", lambda request: HttpResponse(
-        open(settings.BASE_DIR / "robots.txt").read(),
+        f"User-agent: *\n"
+        f"Disallow: /django-admin/\n"
+        f"Disallow: /accounts/admin-panel/\n"
+        f"Disallow: /payments/webhook/\n"
+        f"Disallow: /fulfillment/\n"
+        f"Disallow: /orders/download/\n"
+        f"Disallow: /accounts/verify-email/\n"
+        f"Disallow: /accounts/password-reset/\n"
+        f"Disallow: /cart/\n"
+        f"Disallow: /checkout/\n\n"
+        f"Sitemap: {request.build_absolute_uri('/sitemap.xml')}\n",
         content_type="text/plain",
     )),
 ]
