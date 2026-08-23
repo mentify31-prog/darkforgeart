@@ -1,5 +1,24 @@
 {% extends "base.html" %}
 
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": "{{ product.title|escapejs }}",
+  "image": ["{{ preview_url|escapejs }}"],
+  "description": "{{ product.description|striptags|truncatewords:50|escapejs }}",
+  "offers": {
+    "@type": "Offer",
+    "priceCurrency": "USD",
+    "price": "{{ product.effective_price_usd }}",
+    "availability": "https://schema.org/InStock",
+    "url": "{{ BASE_URL }}{{ request.path }}"
+  }
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <section>
   <div class="container product-detail-grid">

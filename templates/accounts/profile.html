@@ -1,34 +1,138 @@
 {% extends "base.html" %}
 
+{% block robots %}noindex, follow{% endblock %}
+
+{% block title %}Account Settings - DarkForge Art{% endblock %}
+
 {% block content %}
-<section>
-  <div class="container" style="max-width:600px;">
-    <div style="margin-bottom:2.5rem;">
-      <p class="text-upper text-muted" style="margin-bottom:0.4rem;">Account Settings</p>
-      <h1 style="font-size:1.75rem;">Your Profile</h1>
+<section style="padding-top:2.5rem;padding-bottom:4rem;">
+  <div class="container" style="max-width:820px;">
+    
+    {# Top Profile Card Header (EduAI Style) #}
+    <div style="background:var(--color-surface);border:1px solid var(--color-border);padding:2rem;margin-bottom:2rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;position:relative;overflow:hidden;">
+      <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg, var(--color-accent), #4a154b);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.75rem;font-weight:700;color:var(--color-white);flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,0.4);border:2px solid var(--color-border);">
+        {% if user.avatar_url %}
+          <img src="{{ user.avatar_url }}" alt="{{ user.first_name }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+        {% else %}
+          {{ user.first_name|default:user.email|slice:":1"|upper }}
+        {% endif %}
+      </div>
+
+      <div style="flex:1;min-width:220px;">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.3rem;">
+          <h1 style="font-size:1.5rem;color:var(--color-white);margin:0;">{{ user.get_full_name|default:user.username }}</h1>
+          <span style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.25rem 0.6rem;background:rgba(217,4,41,0.15);color:var(--color-accent-light);border:1px solid rgba(217,4,41,0.3);border-radius:2px;font-weight:600;">
+            {{ user.get_role_display }}
+          </span>
+        </div>
+        <p style="color:var(--color-text-muted);font-size:0.9rem;margin:0;display:flex;align-items:center;gap:0.5rem;">
+          <span>{{ user.email }}</span>
+          {% if user.is_email_verified %}
+          <span style="color:#2ec4b6;font-size:0.8rem;" title="Verified Account">✓ Verified</span>
+          {% endif %}
+        </p>
+      </div>
+
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+        <a href="{{ user.get_dashboard_url }}" class="btn btn-ghost btn-sm">View Dashboard</a>
+        <a href="{% url 'accounts:password_reset' %}" class="btn btn-outline btn-sm" style="color:var(--color-text-muted);">Change Password</a>
+      </div>
     </div>
 
+    {# Form Body #}
     <form method="post" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
 
-      <div style="border:1px solid var(--color-border);padding:2rem;margin-bottom:1.5rem;">
-        <h3 style="font-size:1rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--color-text-muted);margin-bottom:1.5rem;">Personal Info</h3>
-        {% for field in form %}
-        <div class="form-group">
-          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-          {{ field }}
-          {% if field.help_text %}<p style="font-size:0.75rem;color:var(--color-text-faint);margin-top:0.3rem;">{{ field.help_text }}</p>{% endif %}
-          {% if field.errors %}<p class="form-error">{{ field.errors.0 }}</p>{% endif %}
+      <div style="background:var(--color-surface);border:1px solid var(--color-border);padding:2rem;margin-bottom:2rem;">
+        <h3 style="font-family:var(--font-display);font-size:1.05rem;color:var(--color-white);margin-bottom:1.5rem;padding-bottom:0.6rem;border-bottom:1px solid var(--color-border);">
+          Personal Details &amp; Preferences
+        </h3>
+
+        {% if form.non_field_errors %}
+        <div style="background:rgba(217,4,41,0.1);border:1px solid var(--color-accent);color:var(--color-white);padding:0.85rem;margin-bottom:1.5rem;font-size:0.85rem;">
+          {{ form.non_field_errors.0 }}
         </div>
-        {% endfor %}
+        {% endif %}
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;">
+          <div class="form-group" style="margin:0;">
+            <label for="id_first_name" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted);display:block;margin-bottom:0.4rem;">First Name</label>
+            {{ form.first_name }}
+            {% if form.first_name.errors %}<div class="form-error">{{ form.first_name.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label for="id_last_name" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted);display:block;margin-bottom:0.4rem;">Last Name</label>
+            {{ form.last_name }}
+            {% if form.last_name.errors %}<div class="form-error">{{ form.last_name.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;">
+          <div class="form-group" style="margin:0;">
+            <label for="id_phone" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted);display:block;margin-bottom:0.4rem;">Phone Number</label>
+            {{ form.phone }}
+            {% if form.phone.errors %}<div class="form-error">{{ form.phone.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label for="id_country" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted);display:block;margin-bottom:0.4rem;">Country / Region</label>
+            {{ form.country }}
+            {% if form.country.errors %}<div class="form-error">{{ form.country.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label for="id_city" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted);display:block;margin-bottom:0.4rem;">City</label>
+          {{ form.city }}
+          {% if form.city.errors %}<div class="form-error">{{ form.city.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label for="id_bio" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted);display:block;margin-bottom:0.4rem;">Bio / Creative Note</label>
+          {{ form.bio }}
+          {% if form.bio.errors %}<div class="form-error">{{ form.bio.errors.0 }}</div>{% endif %}
+        </div>
+
+        <div style="display:flex;align-items:center;gap:0.6rem;">
+          {{ form.newsletter_opt_in }}
+          <label for="id_newsletter_opt_in" style="font-size:0.85rem;color:var(--color-text);cursor:pointer;margin:0;">
+            Subscribe to DarkForge Art drops, artwork releases, and exclusive promos
+          </label>
+        </div>
       </div>
 
-      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-        <a href="{% url 'accounts:dashboard' %}" class="btn btn-ghost">Cancel</a>
-        <a href="{% url 'accounts:password_reset' %}" class="btn btn-ghost" style="color:var(--color-text-muted);">Change Password</a>
+      <div style="display:flex;gap:1rem;align-items:center;justify-content:flex-end;">
+        <a href="{{ user.get_dashboard_url }}" class="btn btn-ghost">Cancel</a>
+        <button type="submit" class="btn btn-primary" style="padding:0.75rem 2rem;">Save Profile Changes →</button>
       </div>
     </form>
   </div>
 </section>
+
+<style>
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group select,
+.form-group textarea {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  padding: 0.65rem 0.85rem;
+  width: 100%;
+  font-size: 0.875rem;
+  border-radius: 2px;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+.form-error {
+  color: var(--color-accent-light);
+  font-size: 0.75rem;
+  margin-top: 0.3rem;
+}
+</style>
 {% endblock %}

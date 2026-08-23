@@ -64,12 +64,19 @@
           <li><a href="{% url 'gallery:gallery' %}" {% if request.resolver_match.url_name == 'gallery' %}class="active"{% endif %}>Gallery</a></li>
           <li><a href="{% url 'store:shop' %}" {% if request.resolver_match.app_name == 'store' %}class="active"{% endif %}>Shop</a></li>
           <li><a href="{% url 'commissions:commission_request' %}" {% if request.resolver_match.app_name == 'commissions' %}class="active"{% endif %}>Commissions</a></li>
-          <li><a href="{% url 'gallery:about' %}" {% if request.resolver_match.url_name == 'about' %}class="active"{% endif %}>About</a></li>
-          <li><a href="{% url 'accounts:contact' %}" {% if request.resolver_match.url_name == 'contact' %}class="active"{% endif %}>Support</a></li>
         </ul>
       </nav>
 
       <div class="nav-actions">
+        {# Mobile Menu Hamburger Button #}
+        <button id="mobile-menu-btn" class="mobile-menu-toggle" aria-label="Toggle navigation menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+
         {# Theme toggle #}
         <button id="theme-toggle" class="btn btn-ghost btn-sm" aria-label="Toggle theme" style="padding:0.4rem 0.6rem;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;">
           <svg id="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
@@ -99,18 +106,46 @@
         </a>
 
         {% if user.is_authenticated %}
-          <a href="{{ user.get_dashboard_url }}" class="btn btn-ghost btn-sm">Dashboard</a>
-          <form method="post" action="{% url 'accounts:logout' %}" style="display:inline;margin:0;">
+          <a href="{{ user.get_dashboard_url }}" class="btn btn-ghost btn-sm desktop-only">Dashboard</a>
+          <form method="post" action="{% url 'accounts:logout' %}" class="desktop-only" style="display:inline;margin:0;">
             {% csrf_token %}
             <button type="submit" class="btn btn-outline btn-sm" style="color:var(--color-text-muted);">Sign Out</button>
           </form>
         {% else %}
-          <a href="{% url 'accounts:login' %}" class="btn btn-ghost btn-sm">Sign In</a>
-          <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm">Join</a>
+          <a href="{% url 'accounts:login' %}" class="btn btn-ghost btn-sm desktop-only">Sign In</a>
+          <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm desktop-only">Join</a>
         {% endif %}
       </div>
     </div>
   </header>
+
+  {# Mobile Navigation Drawer #}
+  <div id="mobile-menu-overlay" class="mobile-drawer-overlay"></div>
+  <div id="mobile-menu-drawer" class="mobile-drawer">
+    <div class="mobile-drawer-header">
+      <span style="font-family:var(--font-display);font-weight:700;font-size:1.1rem;color:var(--color-white);">DarkForge Art</span>
+      <button id="mobile-menu-close" class="btn btn-ghost" aria-label="Close menu" style="padding:0.4rem;font-size:1.2rem;color:var(--color-white);">✕</button>
+    </div>
+    <div class="mobile-drawer-body">
+      <a href="{% url 'gallery:gallery' %}">🎨 Gallery</a>
+      <a href="{% url 'store:shop' %}">🛍️ Shop</a>
+      <a href="{% url 'commissions:commission_request' %}">✍️ Request Commission</a>
+      <a href="{% url 'gallery:about' %}">⚔️ About the Artist</a>
+      <a href="{% url 'accounts:contact' %}">💬 Support</a>
+      <hr style="border:0;border-top:1px solid var(--color-border);margin:1rem 0;">
+      {% if user.is_authenticated %}
+        <a href="{{ user.get_dashboard_url }}">📊 Dashboard</a>
+        <a href="{% url 'accounts:profile' %}">👤 Profile</a>
+        <form method="post" action="{% url 'accounts:logout' %}" style="margin-top:0.5rem;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline btn-sm" style="width:100%;justify-content:center;">Sign Out</button>
+        </form>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="btn btn-outline btn-sm" style="justify-content:center;margin-bottom:0.5rem;">Sign In</a>
+        <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm" style="justify-content:center;">Create Account</a>
+      {% endif %}
+    </div>
+  </div>
 
   {# Django Messages #}
   {% if messages %}
@@ -152,7 +187,7 @@
         <ul>
           <li><a href="{% url 'gallery:gallery' %}">Gallery</a></li>
           <li><a href="{% url 'commissions:commission_request' %}">Request Commission</a></li>
-          <li><a href="#about">About the Artist</a></li>
+          <li><a href="{% url 'gallery:about' %}">About the Artist</a></li>
         </ul>
       </div>
 
@@ -218,6 +253,29 @@
           applyTheme(newTheme);
         });
       }
+    })();
+
+    // Mobile Navigation Drawer Toggle
+    (function() {
+      const btn = document.getElementById('mobile-menu-btn');
+      const drawer = document.getElementById('mobile-menu-drawer');
+      const overlay = document.getElementById('mobile-menu-overlay');
+      const closeBtn = document.getElementById('mobile-menu-close');
+
+      function openMenu() {
+        if (drawer) drawer.classList.add('open');
+        if (overlay) overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeMenu() {
+        if (drawer) drawer.classList.remove('open');
+        if (overlay) overlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      if (btn) btn.addEventListener('click', openMenu);
+      if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+      if (overlay) overlay.addEventListener('click', closeMenu);
     })();
   </script>
 

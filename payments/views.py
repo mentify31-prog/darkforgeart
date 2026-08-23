@@ -180,8 +180,7 @@ def initiate_payment(request):
         messages.error(request, paystack.friendly_error(body, "Payment initialization failed."))
         return redirect("orders:checkout")
 
-    # Clear cart from session and store order_number for confirmation
-    request.session["cart"] = {}
+    # Store order_number for reference
     request.session["last_order_number"] = order.order_number
     request.session.modified = True
 
@@ -213,6 +212,8 @@ def verify_payment(request, reference):
         return redirect("orders:checkout")
 
     _mark_payment_success(payment, body)
+    request.session["cart"] = {}
+    request.session.modified = True
     return redirect("orders:order_confirmation", order_number=payment.order.order_number)
 
 

@@ -22,9 +22,9 @@
 {% block content %}
 
 {# ─── Hero Section ─────────────────────────────────────────── #}
-{% if featured_artworks %}
-<section class="hero full-bleed" style="position:relative;overflow:hidden;min-height:90vh;display:flex;align-items:flex-end;">
+<section class="hero full-bleed" style="position:relative;overflow:hidden;min-height:85vh;display:flex;align-items:flex-end;">
   {# Hero background - first featured artwork preview #}
+  {% if featured_artworks %}
   {% with featured_artworks.0 as hero_art %}
   {% if hero_art.preview_public_url %}
   <div class="hero-bg" style="
@@ -35,11 +35,12 @@
   "></div>
   {% endif %}
   {% endwith %}
+  {% endif %}
 
   {# Dark overlay #}
   <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(10,10,10,0.98) 0%, rgba(10,10,10,0.3) 60%, transparent 100%);"></div>
 
-  <div class="container" style="position:relative;z-index:1;padding-bottom:5rem;">
+  <div class="container" style="position:relative;z-index:1;padding-bottom:4rem;">
     <p class="text-upper text-accent" style="margin-bottom:1rem;">Original Artwork</p>
     <h1 style="max-width:16ch;margin-bottom:1.5rem;">
       Dark Art.<br>Forged in Ink.
@@ -54,7 +55,6 @@
     </div>
   </div>
 </section>
-{% endif %}
 
 {# ─── Featured Artworks ────────────────────────────────────── #}
 {% if featured_artworks %}

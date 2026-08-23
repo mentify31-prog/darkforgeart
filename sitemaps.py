@@ -47,6 +47,8 @@ class StaticViewSitemap(Sitemap):
             "gallery:gallery",
             "store:shop",
             "commissions:commission_request",
+            "gallery:about",
+            "accounts:contact",
         ]
 
     def location(self, item):

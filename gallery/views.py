@@ -63,6 +63,16 @@ def gallery(request):
     if style:
         artworks = artworks.filter(style=style)
 
+    # Search query parameter ?q=
+    from django.db.models import Q
+    search_query = request.GET.get("q", "").strip()
+    if search_query:
+        artworks = artworks.filter(
+            Q(title__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(tags__name__icontains=search_query)
+        ).distinct()
+
     artworks = artworks.order_by("-created_at")
 
     # Attach public preview URLs
