@@ -29,9 +29,9 @@ class Migration(migrations.Migration):
                     "tier",
                     models.CharField(
                         choices=[
-                            ("basic", "Basic — Digital artwork"),
-                            ("premium", "Premium — Custom + revisions"),
-                            ("commercial", "Commercial — Business / brand use"),
+                            ("basic", "Basic - Digital artwork"),
+                            ("premium", "Premium - Custom + revisions"),
+                            ("commercial", "Commercial - Business / brand use"),
                         ],
                         default="basic",
                         max_length=20,
@@ -153,7 +153,7 @@ class Migration(migrations.Migration):
                     "final_file_url",
                     models.CharField(
                         blank=True,
-                        help_text="GitHub stored_path for the final delivered file — released after final payment",
+                        help_text="GitHub stored_path for the final delivered file - released after final payment",
                         max_length=512,
                     ),
                 ),

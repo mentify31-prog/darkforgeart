@@ -1,7 +1,7 @@
 """
 fulfillment/printify.py
 
-PrintifyProvider — implements FulfillmentProviderBase for Printify's REST API.
+PrintifyProvider - implements FulfillmentProviderBase for Printify's REST API.
 Docs: https://printify.com/printify-api/
 """
 from __future__ import annotations

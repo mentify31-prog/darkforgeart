@@ -129,7 +129,7 @@ class Migration(migrations.Migration):
                     "edition_sold",
                     models.PositiveSmallIntegerField(
                         default=0,
-                        help_text="Number sold so far — auto-incremented on purchase",
+                        help_text="Number sold so far - auto-incremented on purchase",
                     ),
                 ),
                 (
@@ -248,7 +248,7 @@ class Migration(migrations.Migration):
                 (
                     "file_url",
                     models.CharField(
-                        help_text="GitHub stored_path for the full-resolution download file. Never exposed directly — only served via signed download URL.",
+                        help_text="GitHub stored_path for the full-resolution download file. Never exposed directly - only served via signed download URL.",
                         max_length=512,
                     ),
                 ),

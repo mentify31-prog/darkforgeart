@@ -236,7 +236,7 @@ def google_login(request):
 
 
 def google_callback(request):
-    """Processes Google OAuth2 callback — creates or logs in user."""
+    """Processes Google OAuth2 callback - creates or logs in user."""
     state = request.GET.get("state")
     session_state = request.session.pop("oauth_state", None)
 
@@ -464,7 +464,7 @@ def custom_400(request, exception=None):
 
 def contact(request):
     """
-    Contact / Support view — allows customers and visitors to submit complaints,
+    Contact / Support view - allows customers and visitors to submit complaints,
     download help requests, or general inquiries.
     """
     from .forms import ContactForm
@@ -510,6 +510,6 @@ def contact(request):
 
     context = {
         "form": form,
-        "page_title": "Contact Support — DarkForge Art",
+        "page_title": "Contact Support - DarkForge Art",
     }
     return render(request, "accounts/contact.html", context)

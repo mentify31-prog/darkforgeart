@@ -35,7 +35,7 @@ def home(request):
     context = {
         "featured_artworks": featured_artworks,
         "latest_artworks": latest_artworks,
-        "page_title": "DarkForge Art — Original Dark & Graffiti Art",
+        "page_title": "DarkForge Art - Original Dark & Graffiti Art",
         "meta_description": (
             "Premium dark graffiti artwork, digital prints, apparel and custom commissions. "
             "Original hand-drawn designs transformed into collectible art."
@@ -78,7 +78,7 @@ def gallery(request):
         "styles": styles,
         "selected_tag": selected_tag,
         "selected_style": style,
-        "page_title": "Gallery — DarkForge Art",
+        "page_title": "Gallery - DarkForge Art",
         "meta_description": (
             "Browse original dark graffiti artwork, skull designs, cyberpunk art, "
             "and gothic illustrations by DarkForge Art."
@@ -121,7 +121,7 @@ def artwork_detail(request, slug):
         "process_images": process_images,
         "products": products,
         # NEVER pass artwork.final_url here
-        "page_title": f"{artwork.title} — DarkForge Art",
+        "page_title": f"{artwork.title} - DarkForge Art",
         "meta_description": artwork.description[:160] if artwork.description else (
             f"Original dark art: {artwork.title}. "
             "Available as digital download, print, and merchandise."
@@ -134,9 +134,9 @@ def artwork_detail(request, slug):
 def about(request):
     """About the artist and DarkForge Art story."""
     context = {
-        "page_title": "About the Artist — DarkForge Art",
+        "page_title": "About the Artist - DarkForge Art",
         "meta_description": (
-            "Learn about DarkForge Art — original hand-drawn dark and graffiti artwork, "
+            "Learn about DarkForge Art - original hand-drawn dark and graffiti artwork, "
             "digital prints, POD apparel, and custom commissions."
         ),
     }

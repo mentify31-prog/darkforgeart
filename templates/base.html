@@ -7,7 +7,7 @@
 
   {# SEO #}
   <title>{% block title %}{{ page_title|default:PLATFORM_NAME }}{% endblock %}</title>
-  <meta name="description" content="{% block meta_description %}{{ meta_description|default:'DarkForge Art — Original dark graffiti artwork, digital prints, apparel and custom commissions.' }}{% endblock %}">
+  <meta name="description" content="{% block meta_description %}{{ meta_description|default:'DarkForge Art - Original dark graffiti artwork, digital prints, apparel and custom commissions.' }}{% endblock %}">
   <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
   <link rel="canonical" href="{{ BASE_URL }}{% block canonical %}{{ request.path }}{% endblock %}">
 
@@ -24,7 +24,7 @@
   <meta name="twitter:title" content="{% block twitter_title %}{{ page_title|default:PLATFORM_NAME }}{% endblock %}">
   <meta name="twitter:description" content="{% block twitter_description %}{{ meta_description|default:'' }}{% endblock %}">
 
-  {# Fonts — served from Google Fonts for elegance #}
+  {# Fonts - served from Google Fonts for elegance #}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   {% block extra_css %}{% endblock %}
 
-  {# Structured Data — Organization #}
+  {# Structured Data - Organization #}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -178,7 +178,7 @@
     </div>
   </footer>
 
-  {# Base JS — auto-dismiss messages & theme toggle #}
+  {# Base JS - auto-dismiss messages & theme toggle #}
   <script>
     document.querySelectorAll('.message[data-autohide]').forEach(function(el) {
       var delay = parseInt(el.dataset.autohide, 10);

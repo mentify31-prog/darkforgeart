@@ -61,7 +61,7 @@ class Migration(migrations.Migration):
                     models.JSONField(
                         blank=True,
                         default=dict,
-                        help_text="Shipping address JSON — required for physical products",
+                        help_text="Shipping address JSON - required for physical products",
                     ),
                 ),
                 ("notes", models.TextField(blank=True)),

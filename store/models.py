@@ -4,10 +4,10 @@ store/models.py
 Product system for DarkForge Art.
 
 Four product types:
-1. DigitalProduct  — downloadable file (PNG, PDF, etc.)
-2. PhysicalProduct — POD via Printful or Printify
-3. LimitedEdition  — limited run (digital, print, or original)
-4. LicenseProduct  — commercial/exclusive artwork license
+1. DigitalProduct - downloadable file (PNG, PDF, etc.)
+2. PhysicalProduct - POD via Printful or Printify
+3. LimitedEdition - limited run (digital, print, or original)
+4. LicenseProduct - commercial/exclusive artwork license
 
 All use a shared base Product model via OneToOne relationships.
 
@@ -142,7 +142,7 @@ class DigitalProduct(models.Model):
         max_length=512,
         help_text=_(
             "GitHub stored_path for the full-resolution download file. "
-            "Never exposed directly — only served via signed download URL."
+            "Never exposed directly - only served via signed download URL."
         ),
     )
     file_size_bytes = models.PositiveBigIntegerField(default=0)
@@ -234,7 +234,7 @@ class ProductVariant(models.Model):
         ordering = ["size", "color"]
 
     def __str__(self):
-        return f"{self.physical_product.product.title} — {self.size} / {self.color}"
+        return f"{self.physical_product.product.title} - {self.size} / {self.color}"
 
     @property
     def effective_price(self):
@@ -265,7 +265,7 @@ class LimitedEdition(models.Model):
     )
     edition_sold = models.PositiveSmallIntegerField(
         default=0,
-        help_text=_("Number sold so far — auto-incremented on purchase"),
+        help_text=_("Number sold so far - auto-incremented on purchase"),
     )
     includes_original_sketch = models.BooleanField(
         default=False,

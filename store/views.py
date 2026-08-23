@@ -30,7 +30,7 @@ def shop(request):
 
     products = products.order_by("-created_at")
 
-    # Attach preview URLs — use Printify mockup for physical products
+    # Attach preview URLs - use Printify mockup for physical products
     for product in products:
         phys = getattr(product, "physical_detail", None)
         if phys and phys.mockup_image_url:
@@ -44,7 +44,7 @@ def shop(request):
         "products": products,
         "product_types": ProductType.choices,
         "selected_type": product_type,
-        "page_title": "Shop — DarkForge Art",
+        "page_title": "Shop - DarkForge Art",
         "meta_description": (
             "Buy dark graffiti art, digital downloads, apparel, "
             "limited editions and commercial licenses."
@@ -88,9 +88,9 @@ def product_detail(request, slug):
         "mockup_images": mockup_images,
         "variants": variants,
         "limited_detail": limited_detail,
-        "page_title": f"{product.title} — DarkForge Art",
+        "page_title": f"{product.title} - DarkForge Art",
         "meta_description": product.description[:160] if product.description else (
-            f"{product.title} — available from DarkForge Art."
+            f"{product.title} - available from DarkForge Art."
         ),
         "og_image": preview_url,
     }
@@ -141,7 +141,7 @@ def cart(request):
         "cart_items": cart_items,
         "total": total,
         "total_usd": total_usd,
-        "page_title": "Your Cart — DarkForge Art",
+        "page_title": "Your Cart - DarkForge Art",
     }
     return render(request, "store/cart.html", context)
 

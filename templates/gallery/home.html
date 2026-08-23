@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}DarkForge Art — Original Dark & Graffiti Art{% endblock %}
+{% block title %}DarkForge Art - Original Dark & Graffiti Art{% endblock %}
 
 {% block structured_data %}
 <script type="application/ld+json">
@@ -24,7 +24,7 @@
 {# ─── Hero Section ─────────────────────────────────────────── #}
 {% if featured_artworks %}
 <section class="hero full-bleed" style="position:relative;overflow:hidden;min-height:90vh;display:flex;align-items:flex-end;">
-  {# Hero background — first featured artwork preview #}
+  {# Hero background - first featured artwork preview #}
   {% with featured_artworks.0 as hero_art %}
   {% if hero_art.preview_public_url %}
   <div class="hero-bg" style="
@@ -45,7 +45,7 @@
       Dark Art.<br>Forged in Ink.
     </h1>
     <p style="color:var(--color-text-muted);max-width:50ch;font-size:1.05rem;margin-bottom:2.5rem;">
-      Graffiti-inspired dark art — hand-drawn originals transformed into digital prints,
+      Graffiti-inspired dark art - hand-drawn originals transformed into digital prints,
       limited editions, and custom commissions.
     </p>
     <div style="display:flex;gap:1rem;flex-wrap:wrap;">
@@ -76,7 +76,7 @@
           <div class="artwork-thumb" style="aspect-ratio:1;overflow:hidden;">
             <img
               src="{{ artwork.preview_public_url }}"
-              alt="{{ artwork.title }} — DarkForge Art preview"
+              alt="{{ artwork.title }} - DarkForge Art preview"
               loading="lazy"
               style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease;"
             >
@@ -144,7 +144,7 @@
       Want Something Made Just for You?
     </h2>
     <p style="color:var(--color-text-muted);max-width:56ch;margin:0 auto 2.5rem;font-size:1.05rem;">
-      Commission a unique piece — from personal artwork to commercial designs.
+      Commission a unique piece - from personal artwork to commercial designs.
       Every piece begins with a pencil and ends as a masterwork.
     </p>
     <a href="{% url 'commissions:commission_request' %}" class="btn btn-primary btn-lg">Request a Commission</a>

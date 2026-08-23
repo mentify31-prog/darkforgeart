@@ -1,5 +1,5 @@
 """
-DarkForge Art — Production Settings
+DarkForge Art - Production Settings
 """
 
 import os

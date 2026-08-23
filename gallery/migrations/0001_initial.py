@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                     "story",
                     models.TextField(
                         blank=True,
-                        help_text="The artistic story/process behind this piece — shown on the product page",
+                        help_text="The artistic story/process behind this piece - shown on the product page",
                     ),
                 ),
                 (
@@ -95,7 +95,7 @@ class Migration(migrations.Migration):
                     "final_url",
                     models.CharField(
                         blank=True,
-                        help_text="GitHub stored_path for the full-resolution final artwork. NEVER exposed in templates — only sent via signed download URL after payment.",
+                        help_text="GitHub stored_path for the full-resolution final artwork. NEVER exposed in templates - only sent via signed download URL after payment.",
                         max_length=512,
                     ),
                 ),

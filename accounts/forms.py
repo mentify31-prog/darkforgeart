@@ -140,7 +140,7 @@ class ProfileEditForm(forms.ModelForm):
 
 
 class DFAPasswordResetForm(PasswordResetForm):
-    """Standard password reset form — email field only."""
+    """Standard password reset form - email field only."""
     email = forms.EmailField(
         widget=forms.EmailInput(attrs={"placeholder": "Your email address"}),
     )

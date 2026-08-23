@@ -7,4 +7,4 @@ Download your high-resolution artwork file using the link below:
 
 Note: This link allows up to {{ delivery.max_downloads }} downloads.
 
-DarkForge Art — Dark & Gothic Digital Art Platform
+DarkForge Art - Dark & Gothic Digital Art Platform

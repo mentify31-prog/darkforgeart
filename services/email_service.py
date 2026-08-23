@@ -108,7 +108,7 @@ def send_welcome_email(user) -> bool:
 def send_verification_email(user, verify_url: str) -> bool:
     platform = getattr(settings, "PLATFORM_NAME", "DarkForge Art")
     return send_template_email(
-        subject=f"Verify your email — {platform}",
+        subject=f"Verify your email - {platform}",
         recipient=user.email,
         template_txt="emails/verify_email.txt",
         template_html="emails/verify_email.html",
@@ -119,7 +119,7 @@ def send_verification_email(user, verify_url: str) -> bool:
 def send_order_confirmation_email(order) -> bool:
     platform = getattr(settings, "PLATFORM_NAME", "DarkForge Art")
     return send_template_email(
-        subject=f"Order Confirmed — {order.order_number}",
+        subject=f"Order Confirmed - {order.order_number}",
         recipient=order.shipping_email,
         template_txt="emails/order_confirmation.txt",
         template_html="emails/order_confirmation.html",
@@ -132,7 +132,7 @@ def send_digital_delivery_email(order, delivery) -> bool:
     base_url = getattr(settings, "BASE_URL", "")
     download_url = f"{base_url}/orders/download/{delivery.download_token}/"
     return send_template_email(
-        subject=f"Your download is ready — {platform}",
+        subject=f"Your download is ready - {platform}",
         recipient=order.shipping_email,
         template_txt="emails/digital_delivery.txt",
         template_html="emails/digital_delivery.html",
@@ -148,7 +148,7 @@ def send_digital_delivery_email(order, delivery) -> bool:
 def send_commission_received_email(commission) -> bool:
     platform = getattr(settings, "PLATFORM_NAME", "DarkForge Art")
     return send_template_email(
-        subject=f"Commission request received — {platform}",
+        subject=f"Commission request received - {platform}",
         recipient=commission.client.email,
         template_txt="emails/commission_received.txt",
         template_html="emails/commission_received.html",
@@ -161,7 +161,7 @@ def send_commission_quoted_email(commission) -> bool:
     base_url = getattr(settings, "BASE_URL", "")
     commission_url = f"{base_url}/commissions/{commission.pk}/"
     return send_template_email(
-        subject=f"Your commission has been quoted — {platform}",
+        subject=f"Your commission has been quoted - {platform}",
         recipient=commission.client.email,
         template_txt="emails/commission_quoted.txt",
         template_html="emails/commission_quoted.html",
@@ -178,7 +178,7 @@ def send_commission_preview_email(commission, revision) -> bool:
     base_url = getattr(settings, "BASE_URL", "")
     commission_url = f"{base_url}/commissions/{commission.pk}/"
     return send_template_email(
-        subject=f"Your commission preview is ready — {platform}",
+        subject=f"Your commission preview is ready - {platform}",
         recipient=commission.client.email,
         template_txt="emails/commission_preview.txt",
         template_html="emails/commission_preview.html",
@@ -196,7 +196,7 @@ def send_commission_completed_email(commission) -> bool:
     base_url = getattr(settings, "BASE_URL", "")
     commission_url = f"{base_url}/commissions/{commission.pk}/"
     return send_template_email(
-        subject=f"Your commission is complete — {platform}",
+        subject=f"Your commission is complete - {platform}",
         recipient=commission.client.email,
         template_txt="emails/commission_completed.txt",
         template_html="emails/commission_completed.html",
@@ -211,7 +211,7 @@ def send_commission_completed_email(commission) -> bool:
 def send_shipping_notification_email(order, fulfillment_order) -> bool:
     platform = getattr(settings, "PLATFORM_NAME", "DarkForge Art")
     return send_template_email(
-        subject=f"Your order has shipped — {platform}",
+        subject=f"Your order has shipped - {platform}",
         recipient=order.shipping_email,
         template_txt="emails/shipping_notification.txt",
         template_html="emails/shipping_notification.html",

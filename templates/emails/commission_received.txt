@@ -5,4 +5,4 @@ Title: {{ commission.title }}
 
 We will review your vision and send you a custom price quote shortly.
 
-DarkForge Art — Dark & Gothic Custom Art Commissions
+DarkForge Art - Dark & Gothic Custom Art Commissions

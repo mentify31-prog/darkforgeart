@@ -1,12 +1,12 @@
 Here is the complete, professional setup for your new **Black & Red Metal** artwork. 
 
-This piece looks incredible—the matte obsidian steel texture, glowing blood-red eyes, and sharp crimson wing sigils make it ideal for heavy metal band merch, dark streetwear, and high-end wall prints.
+This piece looks incredible - the matte obsidian steel texture, glowing blood-red eyes, and sharp crimson wing sigils make it ideal for heavy metal band merch, dark streetwear, and high-end wall prints.
 
 ---
 
 ## 🎨 1. GALLERY ENTRY (For `Gallery -> Artworks -> Add Artwork`)
 
-- **Title**: `Demon of the Celestial Spheres — Obsidian Metal Edition`
+- **Title**: `Demon of the Celestial Spheres - Obsidian Metal Edition`
 - **Slug**: `demon-of-the-celestial-spheres-obsidian-metal`
 - **Style**: Select **`Black & Red Metal`**
 - **Artwork Type**: Select **`Merchandise Design`** *(or `Digital Artwork`)*
@@ -27,7 +27,7 @@ Here is how to set up and price this artwork across **all 4 product types** in *
 ---
 
 ### Option A: Digital Download (4K Wallpaper & Print File)
-- **Product Title**: `Demon of the Celestial Spheres — Obsidian Metal (4K Digital Download)`
+- **Product Title**: `Demon of the Celestial Spheres - Obsidian Metal (4K Digital Download)`
 - **Product Type**: `Digital Download`
 - **Price to enter in Admin**: **`2600.00` KES**
 - **Displays on Site**: **`$20.00`**
@@ -37,7 +37,7 @@ Here is how to set up and price this artwork across **all 4 product types** in *
 ---
 
 ### Option B: Physical Merchandise (POD Heavyweight Black Hoodie)
-- **Product Title**: `Obsidian Metal Demon — Heavyweight Dark Hoodie`
+- **Product Title**: `Obsidian Metal Demon - Heavyweight Dark Hoodie`
 - **Product Type**: `Physical Product`
 - **Price to enter in Admin**: **`7150.00` KES**
 - **Displays on Site**: **`$55.00`**
@@ -47,7 +47,7 @@ Here is how to set up and price this artwork across **all 4 product types** in *
 ---
 
 ### Option C: Limited Edition (Exclusive Numbered Metal Wall Print)
-- **Product Title**: `Obsidian Metal Demon — Collector's Aluminum Print (Edition of 20)`
+- **Product Title**: `Obsidian Metal Demon - Collector's Aluminum Print (Edition of 20)`
 - **Product Type**: `Limited Edition`
 - **Price to enter in Admin**: **`9750.00` KES**
 - **Displays on Site**: **`$75.00`**
@@ -57,7 +57,7 @@ Here is how to set up and price this artwork across **all 4 product types** in *
 ---
 
 ### Option D: Commercial License (Album Cover & Band Merch Rights)
-- **Product Title**: `Obsidian Metal Demon — Album Art & Merchandise License`
+- **Product Title**: `Obsidian Metal Demon - Album Art & Merchandise License`
 - **Product Type**: `Commercial License`
 - **Price to enter in Admin**: **`32500.00` KES**
 - **Displays on Site**: **`$250.00`**
@@ -87,10 +87,10 @@ When you add a new item in **Django Admin** -> **Store** -> **Products**, you ch
 - **What it is**: A high-resolution digital art file (PNG, JPG, PDF, or ZIP) that customers can download immediately after payment.
 - **How it works**: The customer pays, and your system automatically emails them a secure, 7-day expiring download link.
 - **When to choose this**:
-  - Selling digital desktop/phone wallpapers.
-  - Selling printable high-res art files (for customers to print at home).
+ - Selling digital desktop/phone wallpapers.
+ - Selling printable high-res art files (for customers to print at home).
 - **Example**: 
-  > *Title*: `Demon Skull — 4K Digital Wallpaper & Print File`  
+  > *Title*: `Demon Skull - 4K Digital Wallpaper & Print File`  
   > *Price*: `KES 1,500`
 
 ---
@@ -99,7 +99,7 @@ When you add a new item in **Django Admin** -> **Store** -> **Products**, you ch
 - **What it is**: Merchandise or physical wall prints manufactured and shipped by **Printful** or **Printify** (Print-On-Demand).
 - **How it works**: When a customer orders, your site sends the order to Printful/Printify automatically to print and ship to the customer's doorstep.
 - **When to choose this**:
-  - Selling T-Shirts, Hoodies, Canvas Prints, Posters, Phone Cases, or Mugs featuring your artwork.
+ - Selling T-Shirts, Hoodies, Canvas Prints, Posters, Phone Cases, or Mugs featuring your artwork.
 - **Example**: 
   > *Title*: `Demon Skull Heavyweight Black Hoodie`  
   > *Price*: `KES 4,500`
@@ -110,9 +110,9 @@ When you add a new item in **Django Admin** -> **Store** -> **Products**, you ch
 - **What it is**: An exclusive run of artwork capped at a fixed number of copies (e.g. only 20 copies will ever be sold).
 - **How it works**: The platform tracks remaining inventory (e.g., *12 of 20 remaining*). Once sold out, the buy button automatically changes to **"Sold Out"** and blocks further purchases.
 - **When to choose this**:
-  - Selling rare collector prints, numbered physical posters, or rare digital collectibles to create urgency and exclusivity.
+ - Selling rare collector prints, numbered physical posters, or rare digital collectibles to create urgency and exclusivity.
 - **Example**: 
-  > *Title*: `Demon of Saturn — Signed Archival Print (Edition of 20)`  
+  > *Title*: `Demon of Saturn - Signed Archival Print (Edition of 20)`  
   > *Price*: `KES 6,000`
 
 ---
@@ -120,12 +120,12 @@ When you add a new item in **Django Admin** -> **Store** -> **Products**, you ch
 ### 4. 📜 Commercial License (`license`)
 - **What it is**: Legal rights for a client or business to use your artwork for their commercial projects (merch production, album artwork, book covers, brand logos).
 - **How it works**: The buyer pays for the specific license type:
-  - **Commercial Use**: Permission to print/sell products with your art (non-exclusive).
-  - **Exclusive License**: Full exclusive rights; you take the artwork off the market so nobody else can buy it.
+ - **Commercial Use**: Permission to print/sell products with your art (non-exclusive).
+ - **Exclusive License**: Full exclusive rights; you take the artwork off the market so nobody else can buy it.
 - **When to choose this**:
-  - Offering ready-made artwork to music bands, clothing brands, or content creators who want to use your design for commercial products.
+ - Offering ready-made artwork to music bands, clothing brands, or content creators who want to use your design for commercial products.
 - **Example**: 
-  > *Title*: `Demon of Saturn — Full Commercial & Album Art License`  
+  > *Title*: `Demon of Saturn - Full Commercial & Album Art License`  
   > *Price*: `KES 25,000`
 
 ---
@@ -154,7 +154,7 @@ Here are **3 compelling Title, Story, and Description options** crafted specific
 - **Short Description**:
   > A striking dark graffiti masterpiece fusing demonology and ancient planetary alchemy. Features a horned third-eye entity rising above a blazing demonic skull framed by vivid, dripping celestial wings.
 - **Story (Background Narrative)**:
-  > Born from the fusion of raw ink and street-graffiti spray techniques, *Demon of the Celestial Spheres* explores the boundary between divine alchemy and dark underworld spirits. The upper horned entity channels cosmic foresight through its glowing third eye, while the bat-like wings bear ancient planetary symbols of Saturn, Jupiter, and Venus. Below, a grinning skull emerges from eternal flames—a testament to raw power and spiritual transformation.
+  > Born from the fusion of raw ink and street-graffiti spray techniques, *Demon of the Celestial Spheres* explores the boundary between divine alchemy and dark underworld spirits. The upper horned entity channels cosmic foresight through its glowing third eye, while the bat-like wings bear ancient planetary symbols of Saturn, Jupiter, and Venus. Below, a grinning skull emerges from eternal flames - a testament to raw power and spiritual transformation.
 
 ---
 
@@ -189,13 +189,13 @@ Here are **3 compelling Title, Story, and Description options** crafted specific
 If you list this artwork in your store, here is a suggested setup:
 
 1. **Digital Download**:
-   - Price: `KES 1,500` ($12 USD)
-   - Includes: PNG / High-Res JPEG (4K Wallpaper & Print Ready)
+ - Price: `KES 1,500` ($12 USD)
+ - Includes: PNG / High-Res JPEG (4K Wallpaper & Print Ready)
 
 2. **Physical Print-on-Demand (POD)**:
-   - **T-Shirt / Hoodie** (Printful/Printify): `KES 3,500 - KES 6,000` (Looks incredible printed centered on a Black or Charcoal garment!)
-   - **Canvas Wall Print**: `KES 4,500 - KES 8,500`
+ - **T-Shirt / Hoodie** (Printful/Printify): `KES 3,500 - KES 6,000` (Looks incredible printed centered on a Black or Charcoal garment!)
+ - **Canvas Wall Print**: `KES 4,500 - KES 8,500`
 
 3. **Limited Edition Print**:
-   - Edition Size: `25 Copies`
-   - Price: `KES 5,000` per copy
+ - Edition Size: `25 Copies`
+ - Price: `KES 5,000` per copy

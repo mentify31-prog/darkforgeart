@@ -73,7 +73,7 @@ class Artwork(models.Model):
     description = models.TextField(blank=True)
     story = models.TextField(
         blank=True,
-        help_text=_("The artistic story/process behind this piece — shown on the product page"),
+        help_text=_("The artistic story/process behind this piece - shown on the product page"),
     )
     style = models.CharField(max_length=30, choices=Style.choices, default=Style.NEON_GRAFFITI)
     artwork_type = models.CharField(
@@ -103,7 +103,7 @@ class Artwork(models.Model):
         blank=True,
         help_text=_(
             "GitHub stored_path for the full-resolution final artwork. "
-            "NEVER exposed in templates — only sent via signed download URL after payment."
+            "NEVER exposed in templates - only sent via signed download URL after payment."
         ),
     )
 
@@ -175,7 +175,7 @@ class ArtworkImage(models.Model):
         ordering = ["order", "id"]
 
     def __str__(self):
-        return f"{self.artwork.title} — {self.step_label or 'Step ' + str(self.order)}"
+        return f"{self.artwork.title} - {self.step_label or 'Step ' + str(self.order)}"
 
     def get_public_url(self):
         from services.github_storage import github_public_url

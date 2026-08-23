@@ -64,14 +64,14 @@
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:3rem;">
       {% if original_pencil_url %}
       <figure style="margin:0;">
-        <img src="{{ original_pencil_url }}" alt="Original pencil sketch — {{ artwork.title }}"
+        <img src="{{ original_pencil_url }}" alt="Original pencil sketch - {{ artwork.title }}"
              loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;">
         <figcaption style="padding:0.5rem 0;font-size:0.75rem;color:var(--color-text-muted);">Original Sketch</figcaption>
       </figure>
       {% endif %}
       {% if colored_url %}
       <figure style="margin:0;">
-        <img src="{{ colored_url }}" alt="Colored version — {{ artwork.title }}"
+        <img src="{{ colored_url }}" alt="Colored version - {{ artwork.title }}"
              loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;">
         <figcaption style="padding:0.5rem 0;font-size:0.75rem;color:var(--color-text-muted);">Colored Version</figcaption>
       </figure>
@@ -85,9 +85,9 @@
     {# Large preview image #}
     {% if preview_url %}
     <div style="margin-bottom:2rem;">
-      <img src="{{ preview_url }}" alt="{{ artwork.title }} — watermarked preview"
+      <img src="{{ preview_url }}" alt="{{ artwork.title }} - watermarked preview"
            style="width:100%;display:block;border:1px solid var(--color-border);">
-      <p style="font-size:0.7rem;color:var(--color-text-faint);text-align:center;padding:0.4rem 0;">Watermarked preview — full resolution unlocked after purchase</p>
+      <p style="font-size:0.7rem;color:var(--color-text-faint);text-align:center;padding:0.4rem 0;">Watermarked preview - full resolution unlocked after purchase</p>
     </div>
     {% endif %}
 
@@ -132,7 +132,7 @@
   </div>
 </div>
 
-{# Structured Data — CreativeWork #}
+{# Structured Data - CreativeWork #}
 {% block structured_data %}
 <script type="application/ld+json">
 {

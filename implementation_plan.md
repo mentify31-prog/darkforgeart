@@ -1,8 +1,8 @@
-# DarkForge Art — Django Platform Build Plan
+# DarkForge Art - Django Platform Build Plan
 
 ## Project Overview
 
-**DarkForge Art** is a premium art commerce platform for selling original hand-drawn dark/graffiti artwork transformed into digital products, physical merchandise, and custom commissions. The platform will be built with Django, MySQL, Paystack payments, Google Auth, Resend email, and a Printful/Printify fulfillment abstraction layer. Images are stored in a GitHub repository. The aesthetic is artistic and elegant — no boxy containers, no gradients — art speaks for itself.
+**DarkForge Art** is a premium art commerce platform for selling original hand-drawn dark/graffiti artwork transformed into digital products, physical merchandise, and custom commissions. The platform will be built with Django, MySQL, Paystack payments, Google Auth, Resend email, and a Printful/Printify fulfillment abstraction layer. Images are stored in a GitHub repository. The aesthetic is artistic and elegant - no boxy containers, no gradients - art speaks for itself.
 
 ---
 
@@ -46,7 +46,7 @@
 | Reference project | EduAI (`C:\Users\adm\.vscode\Products\EduAI`) |
 
 > [!IMPORTANT]
-> The EduAI project patterns (custom User model, Paystack integration, GitHub image storage, Resend email backend, settings split, MySQL with prefix) are reused here. We adapt — not copy — those patterns to fit the art-commerce context.
+> The EduAI project patterns (custom User model, Paystack integration, GitHub image storage, Resend email backend, settings split, MySQL with prefix) are reused here. We adapt - not copy - those patterns to fit the art-commerce context.
 
 ---
 
@@ -54,11 +54,11 @@
 
 ---
 
-### PHASE 1 — Project Scaffolding & Core Setup
+### PHASE 1 - Project Scaffolding & Core Setup
 
 > Goal: A running Django project with correct settings, MySQL, environment config, and project structure.
 
-#### Step 1.1 — Create Django Project & Directory Structure
+#### Step 1.1 - Create Django Project & Directory Structure
 
 **File/Folder layout:**
 ```
@@ -107,7 +107,7 @@ DarkForgeArt/
 
 ---
 
-#### Step 1.2 — Requirements & Environment
+#### Step 1.2 - Requirements & Environment
 
 **`requirements.txt`:**
 ```
@@ -157,7 +157,7 @@ ADMIN_EMAILS=
 
 ---
 
-#### Step 1.3 — Base Settings (following EduAI pattern)
+#### Step 1.3 - Base Settings (following EduAI pattern)
 
 Configure `config/settings/base.py` with:
 - MySQL database with `dfa_` prefix
@@ -173,7 +173,7 @@ Configure `config/settings/base.py` with:
 
 ---
 
-#### Step 1.4 — Database Helper & Table Prefix
+#### Step 1.4 - Database Helper & Table Prefix
 
 Create `core/db.py` (or inline in each `models.py`) with:
 ```python
@@ -188,30 +188,30 @@ All models will use `db_table = table_name("...")`.
 
 ---
 
-### PHASE 2 — Authentication & User Accounts
+### PHASE 2 - Authentication & User Accounts
 
-> Goal: Full auth system: register, login, Google OAuth, password reset, email verification — matching EduAI's pattern but simplified for an art store.
+> Goal: Full auth system: register, login, Google OAuth, password reset, email verification - matching EduAI's pattern but simplified for an art store.
 
-#### Step 2.1 — Custom User Model (`accounts/models.py`)
+#### Step 2.1 - Custom User Model (`accounts/models.py`)
 
 **Fields:**
-- `email` — unique, login field
-- `username` — display name / handle
+- `email` - unique, login field
+- `username` - display name / handle
 - `first_name`, `last_name`
-- `role` — choices: `customer`, `admin`
-- `phone` — optional, for order contact
-- `avatar_url` — GitHub-hosted
+- `role` - choices: `customer`, `admin`
+- `phone` - optional, for order contact
+- `avatar_url` - GitHub-hosted
 - `is_email_verified`
 - `created_at`, `updated_at`
 - `db_table = table_name("users")`
 
 **Profile model (separate):**
-- `user` — OneToOne
-- `bio` — artist bio for collectors
+- `user` - OneToOne
+- `bio` - artist bio for collectors
 - `country`, `city`
 - `newsletter_opt_in`
 
-#### Step 2.2 — Auth Views & Forms
+#### Step 2.2 - Auth Views & Forms
 
 Following EduAI `accounts/views.py` pattern:
 
@@ -229,7 +229,7 @@ Following EduAI `accounts/views.py` pattern:
 | `/accounts/profile/` | `ProfileView` | View/edit profile |
 | `/accounts/dashboard/` | `DashboardView` | Customer order/commission history |
 
-#### Step 2.3 — Email Templates (Resend)
+#### Step 2.3 - Email Templates (Resend)
 
 - `emails/verify_email.html`
 - `emails/password_reset.html`
@@ -237,17 +237,17 @@ Following EduAI `accounts/views.py` pattern:
 
 Reuse `services/resend_backend.py` from EduAI, adapted with DarkForge Art sender.
 
-#### Step 2.4 — Google OAuth (manual flow, no allauth)
+#### Step 2.4 - Google OAuth (manual flow, no allauth)
 
-Following EduAI approach — manual Google OAuth2 flow using `requests`. No third-party library needed.
+Following EduAI approach - manual Google OAuth2 flow using `requests`. No third-party library needed.
 
 ---
 
-### PHASE 3 — Artwork & Gallery
+### PHASE 3 - Artwork & Gallery
 
 > Goal: The core content system. Artwork is the heart of the business. This phase builds the gallery, product pages, and watermarked preview system.
 
-#### Step 3.1 — Artwork Models (`gallery/models.py`)
+#### Step 3.1 - Artwork Models (`gallery/models.py`)
 
 ```
 Artwork
@@ -275,20 +275,20 @@ ArtworkTag
 └── slug
 ```
 
-#### Step 3.2 — GitHub Image Service (`services/github_storage.py`)
+#### Step 3.2 - GitHub Image Service (`services/github_storage.py`)
 
 Reused from EduAI `PyGithub` pattern:
 - `upload_image(file, path)` → returns GitHub raw URL
 - `delete_image(path)`
-- `get_signed_preview_url(path)` — for protected downloads (time-limited)
+- `get_signed_preview_url(path)` - for protected downloads (time-limited)
 
-#### Step 3.3 — Watermark Service (`services/watermark.py`)
+#### Step 3.3 - Watermark Service (`services/watermark.py`)
 
 - `apply_watermark(image_path, text="DarkForge Art • Preview")` using Pillow
 - Returns watermarked low-res preview
 - Called when generating preview images for unpaid users
 
-#### Step 3.4 — Gallery Views (`gallery/views.py`)
+#### Step 3.4 - Gallery Views (`gallery/views.py`)
 
 | URL | View | Description |
 |---|---|---|
@@ -300,18 +300,18 @@ Reused from EduAI `PyGithub` pattern:
 
 ---
 
-### PHASE 4 — Product & Store System
+### PHASE 4 - Product & Store System
 
 > Goal: Four product types: Digital Art, Physical Products, Limited Editions, and Commercial Licenses.
 
-#### Step 4.1 — Product Models (`store/models.py`)
+#### Step 4.1 - Product Models (`store/models.py`)
 
 ```
 ProductType (TextChoices)
-├── DIGITAL        — downloadable file
-├── PHYSICAL       — POD via Printful/Printify
-├── LIMITED        — limited edition (digital or print, max copies)
-└── LICENSE        — commercial/exclusive license
+├── DIGITAL - downloadable file
+├── PHYSICAL - POD via Printful/Printify
+├── LIMITED - limited edition (digital or print, max copies)
+└── LICENSE - commercial/exclusive license
 
 Product
 ├── artwork (FK to Artwork)
@@ -326,7 +326,7 @@ Product
 
 DigitalProduct (extends Product via OneToOne or subclass)
 ├── product (OneToOne → Product)
-├── file_url (GitHub — PRIVATE, signed URL on purchase)
+├── file_url (GitHub - PRIVATE, signed URL on purchase)
 ├── file_size_bytes
 ├── license_type (personal / commercial / exclusive)
 
@@ -355,7 +355,7 @@ LicenseProduct (extends Product)
 ├── allowed_uses
 ```
 
-#### Step 4.2 — Product Variant Model
+#### Step 4.2 - Product Variant Model
 
 For physical products with size/color options:
 ```
@@ -369,7 +369,7 @@ ProductVariant
 ├── stock_available (Bool)
 ```
 
-#### Step 4.3 — Store Views (`store/views.py`)
+#### Step 4.3 - Store Views (`store/views.py`)
 
 | URL | View | Description |
 |---|---|---|
@@ -379,21 +379,21 @@ ProductVariant
 | `/cart/add/<id>/` | `AddToCartView` | Add item to cart |
 | `/cart/remove/<id>/` | `RemoveFromCartView` | Remove from cart |
 
-#### Step 4.4 — Cart (Session-based)
+#### Step 4.4 - Cart (Session-based)
 
-Cart data stored in `request.session` — no DB model needed for cart itself. Cart items reference `Product.id` and `ProductVariant.id`.
+Cart data stored in `request.session` - no DB model needed for cart itself. Cart items reference `Product.id` and `ProductVariant.id`.
 
 ---
 
-### PHASE 5 — Orders
+### PHASE 5 - Orders
 
 > Goal: Order system that handles both digital and physical product orders uniformly.
 
-#### Step 5.1 — Order Models (`orders/models.py`)
+#### Step 5.1 - Order Models (`orders/models.py`)
 
 ```
 Order
-├── user (FK — null allowed for guest, but we encourage registration)
+├── user (FK - null allowed for guest, but we encourage registration)
 ├── order_number (unique, e.g. DFA-2026-001234)
 ├── status (pending / paid / processing / fulfilled / cancelled / refunded)
 ├── total_amount
@@ -425,7 +425,7 @@ DigitalDelivery
 └── downloaded_at
 ```
 
-#### Step 5.2 — Signed Download URL
+#### Step 5.2 - Signed Download URL
 
 ```
 /download/<uuid:token>/
@@ -439,11 +439,11 @@ View checks:
 
 ---
 
-### PHASE 6 — Payments (Paystack)
+### PHASE 6 - Payments (Paystack)
 
 > Goal: Paystack integration for both card payments and M-Pesa (Paystack handles both in Kenya). Webhook-driven order fulfillment.
 
-#### Step 6.1 — Payment Models (`payments/models.py`)
+#### Step 6.1 - Payment Models (`payments/models.py`)
 
 ```
 Payment
@@ -454,12 +454,12 @@ Payment
 ├── status (pending / success / failed / refunded)
 ├── provider (paystack)
 ├── payment_method (card / m-pesa / bank_transfer)
-├── paystack_response (JSONField — raw webhook payload)
+├── paystack_response (JSONField - raw webhook payload)
 ├── paid_at
 ├── created_at
 ```
 
-#### Step 6.2 — Paystack Flow
+#### Step 6.2 - Paystack Flow
 
 Following EduAI `payments/views.py` pattern:
 
@@ -478,7 +478,7 @@ Following EduAI `payments/views.py` pattern:
    → idempotent: checks if already processed
 ```
 
-#### Step 6.3 — Post-Payment Actions
+#### Step 6.3 - Post-Payment Actions
 
 After payment confirmed:
 - **Digital products**: generate `DigitalDelivery` record, send download email
@@ -488,17 +488,17 @@ After payment confirmed:
 
 ---
 
-### PHASE 7 — Commission System
+### PHASE 7 - Commission System
 
 > Goal: Full commission request workflow with multi-step status, deposit payment, preview/revision, and final delivery.
 
-#### Step 7.1 — Commission Models (`commissions/models.py`)
+#### Step 7.1 - Commission Models (`commissions/models.py`)
 
 ```
 CommissionTier (choices)
-├── BASIC     — digital artwork, fixed price
-├── PREMIUM   — custom + revisions
-└── COMMERCIAL — commercial usage
+├── BASIC - digital artwork, fixed price
+├── PREMIUM - custom + revisions
+└── COMMERCIAL - commercial usage
 
 Commission
 ├── client (FK → User)
@@ -524,7 +524,7 @@ CommissionRevision
 ├── commission (FK)
 ├── revision_number
 ├── artist_notes
-├── preview_url (GitHub — watermarked)
+├── preview_url (GitHub - watermarked)
 ├── client_response (approved / revision_requested)
 ├── client_notes
 ├── created_at
@@ -537,7 +537,7 @@ CommissionMessage (simple Q&A thread)
 ├── created_at
 ```
 
-#### Step 7.2 — Commission Views (`commissions/views.py`)
+#### Step 7.2 - Commission Views (`commissions/views.py`)
 
 | URL | View | Who |
 |---|---|---|
@@ -550,7 +550,7 @@ CommissionMessage (simple Q&A thread)
 | `/admin/commissions/<id>/quote/` | `AdminQuoteView` | Admin |
 | `/admin/commissions/<id>/upload-preview/` | `AdminUploadPreviewView` | Admin |
 
-#### Step 7.3 — Commission Email Notifications
+#### Step 7.3 - Commission Email Notifications
 
 Trigger emails (via Resend) on:
 - New commission submitted → admin notified
@@ -562,11 +562,11 @@ Trigger emails (via Resend) on:
 
 ---
 
-### PHASE 8 — Fulfillment Layer (POD)
+### PHASE 8 - Fulfillment Layer (POD)
 
 > Goal: Abstract Printful and Printify behind a single interface so either can be swapped or used simultaneously.
 
-#### Step 8.1 — Fulfillment Interface (`fulfillment/base.py`)
+#### Step 8.1 - Fulfillment Interface (`fulfillment/base.py`)
 
 ```python
 class FulfillmentProvider:
@@ -576,20 +576,20 @@ class FulfillmentProvider:
     def get_shipping_rates(self, items, address) -> list: ...
 ```
 
-#### Step 8.2 — Printful Provider (`fulfillment/printful.py`)
+#### Step 8.2 - Printful Provider (`fulfillment/printful.py`)
 
 Implements `FulfillmentProvider`:
-- `POST /orders` — create fulfillment order
-- `GET /orders/{id}` — check status
-- `DELETE /orders/{id}` — cancel (before fulfillment)
+- `POST /orders` - create fulfillment order
+- `GET /orders/{id}` - check status
+- `DELETE /orders/{id}` - cancel (before fulfillment)
 
-#### Step 8.3 — Printify Provider (`fulfillment/printify.py`)
+#### Step 8.3 - Printify Provider (`fulfillment/printify.py`)
 
 Implements `FulfillmentProvider`:
 - `POST /v1/shops/{shop_id}/orders.json`
 - `GET /v1/shops/{shop_id}/orders/{id}.json`
 
-#### Step 8.4 — Fulfillment Models (`fulfillment/models.py`)
+#### Step 8.4 - Fulfillment Models (`fulfillment/models.py`)
 
 ```
 FulfillmentOrder
@@ -606,19 +606,19 @@ FulfillmentOrder
 ├── updated_at
 ```
 
-#### Step 8.5 — Fulfillment Webhooks
+#### Step 8.5 - Fulfillment Webhooks
 
-- `/fulfillment/printful/webhook/` — handles `package_shipped`, `order_fulfilled`
-- `/fulfillment/printify/webhook/` — handles equivalent events
+- `/fulfillment/printful/webhook/` - handles `package_shipped`, `order_fulfilled`
+- `/fulfillment/printify/webhook/` - handles equivalent events
 - Both update `FulfillmentOrder` and email customer with tracking info
 
 ---
 
-### PHASE 9 — Admin Dashboard
+### PHASE 9 - Admin Dashboard
 
 > Goal: Artist-facing admin to manage everything without needing Django's built-in admin for day-to-day tasks.
 
-#### Step 9.1 — Custom Admin Views (`accounts/views.py` — admin section)
+#### Step 9.1 - Custom Admin Views (`accounts/views.py` - admin section)
 
 | URL | View | Description |
 |---|---|---|
@@ -634,7 +634,7 @@ FulfillmentOrder
 | `/admin-panel/commissions/<id>/` | `AdminCommissionDetailView` | Commission detail |
 | `/admin-panel/customers/` | `AdminCustomerListView` | Customer list |
 
-#### Step 9.2 — Admin Dashboard Stats
+#### Step 9.2 - Admin Dashboard Stats
 
 - Total revenue (today / this week / this month)
 - Orders by status
@@ -644,11 +644,11 @@ FulfillmentOrder
 
 ---
 
-### PHASE 10 — SEO & Frontend Styling
+### PHASE 10 - SEO & Frontend Styling
 
 > Goal: Google-optimized, artistically styled frontend that communicates DarkForge Art's identity.
 
-#### Step 10.1 — SEO Structure
+#### Step 10.1 - SEO Structure
 
 For every page:
 - Unique `<title>` tag
@@ -664,16 +664,16 @@ For every page:
 - Gallery pages → `ImageObject` / `CreativeWork` schema
 - Homepage → `Organization` schema
 
-#### Step 10.2 — Design Direction
+#### Step 10.2 - Design Direction
 
-Per `decisions.md`: *"artistic, no containers, no color gradients — something that preaches art and elegance."*
+Per `decisions.md`: *"artistic, no containers, no color gradients - something that preaches art and elegance."*
 
 **Design language:**
 - **Color palette**: Deep blacks, warm charcoals, off-whites, accent with deep crimson or electric ink-blue
 - **Typography**: Display font (e.g. Cinzel or Playfair Display) for headings; clean sans-serif for body
 - **Layout**: Full-bleed images, no card borders, masonry/grid gallery
 - **Artwork presentation**: Full-width hero images, dark backgrounds, no white boxy containers
-- **Animations**: Subtle fade-ins on scroll, ink-reveal effects — tasteful, not distracting
+- **Animations**: Subtle fade-ins on scroll, ink-reveal effects - tasteful, not distracting
 
 **Static files:**
 ```
@@ -690,9 +690,9 @@ static/
 │   └── checkout.js   (Paystack init)
 ```
 
-**No Bootstrap or Tailwind** — custom CSS to keep the design unique and artistically controlled.
+**No Bootstrap or Tailwind** - custom CSS to keep the design unique and artistically controlled.
 
-#### Step 10.3 — Template Structure
+#### Step 10.3 - Template Structure
 
 ```
 templates/
@@ -731,9 +731,9 @@ templates/
 
 ---
 
-### PHASE 11 — Final Touches & Hardening
+### PHASE 11 - Final Touches & Hardening
 
-#### Step 11.1 — Security
+#### Step 11.1 - Security
 
 - Signed, expiring download URLs for digital files
 - HMAC validation on Paystack and POD webhooks
@@ -742,7 +742,7 @@ templates/
 - Rate limiting on commission submit and checkout endpoints
 - CSRF on all POST forms
 
-#### Step 11.2 — Email Flows
+#### Step 11.2 - Email Flows
 
 | Trigger | Email |
 |---|---|
@@ -756,12 +756,12 @@ templates/
 | Commission completed | Final delivery email |
 | Fulfillment shipped | Shipping confirmation with tracking |
 
-#### Step 11.3 — robots.txt & sitemap.xml
+#### Step 11.3 - robots.txt & sitemap.xml
 
 - Block `/admin/`, `/admin-panel/`, `/download/`, `/payments/webhook/`
 - Sitemap includes: gallery, shop products, home, commission page
 
-#### Step 11.4 — Performance
+#### Step 11.4 - Performance
 
 - WhiteNoise for static files
 - Artwork preview images served via GitHub CDN raw URLs
@@ -791,8 +791,8 @@ templates/
 ## Verification Plan
 
 ### After Each Phase
-- Run `python manage.py check` — no errors
-- Run `python manage.py migrate` — clean migrations
+- Run `python manage.py check` - no errors
+- Run `python manage.py migrate` - clean migrations
 - Manually test the feature in a browser
 
 ### Automated
@@ -811,4 +811,4 @@ templates/
 ---
 
 > [!NOTE]
-> Each phase is built and verified before moving to the next. This mirrors the advice in `info.md`: *"Give it the architecture incrementally"* — you end up with a system you understand and can debug.
+> Each phase is built and verified before moving to the next. This mirrors the advice in `info.md`: *"Give it the architecture incrementally"* - you end up with a system you understand and can debug.

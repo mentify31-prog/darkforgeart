@@ -99,7 +99,7 @@ class GitHubStorageService:
             return None
 
         filename = getattr(file_obj, "name", "file") or "file"
-        # Sanitize filename — keep only alphanumeric, dot, dash, underscore
+        # Sanitize filename - keep only alphanumeric, dot, dash, underscore
         safe_name = "".join(c if c.isalnum() or c in "._-" else "_" for c in filename)
         unique_prefix = uuid.uuid4().hex[:10]
         if filename_prefix:

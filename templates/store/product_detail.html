@@ -105,7 +105,7 @@
               <option value="{{ variant.pk }}" data-price-usd="{{ variant.effective_price_usd|floatformat:2 }}">
                 {% if variant.color %}{{ variant.color }}{% endif %}
                 {% if variant.size %} / {{ variant.size }}{% endif %}
-                — ${{ variant.effective_price_usd|floatformat:2 }}
+ - ${{ variant.effective_price_usd|floatformat:2 }}
               </option>
               {% endfor %}
             </select>

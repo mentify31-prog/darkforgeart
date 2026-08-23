@@ -20,7 +20,7 @@ logger = logging.getLogger("darkforge")
 
 def checkout(request):
     """
-    Checkout page — collect shipping info and display order summary.
+    Checkout page - collect shipping info and display order summary.
     Passes the cart to the payment step.
     """
     cart_data = request.session.get("cart", {})
@@ -77,7 +77,7 @@ def checkout(request):
         "total_usd": total_usd,
         "requires_shipping": requires_shipping,
         "PAYSTACK_PUBLIC_KEY": settings.PAYSTACK_PUBLIC_KEY,
-        "page_title": "Checkout — DarkForge Art",
+        "page_title": "Checkout - DarkForge Art",
     }
     return render(request, "orders/checkout.html", context)
 
@@ -97,7 +97,7 @@ def order_confirmation(request, order_number):
     context = {
         "order": order,
         "items": order.items.select_related("product__artwork").all(),
-        "page_title": f"Order Confirmed — {order.order_number}",
+        "page_title": f"Order Confirmed - {order.order_number}",
     }
     return render(request, "orders/order_confirmation.html", context)
 
@@ -178,7 +178,7 @@ def order_detail(request, order_number):
     context = {
         "order": order,
         "items": items,
-        "page_title": f"Order {order.order_number} — DarkForge Art",
+        "page_title": f"Order {order.order_number} - DarkForge Art",
     }
     return render(request, "orders/order_detail.html", context)
 

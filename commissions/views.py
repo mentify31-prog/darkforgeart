@@ -88,7 +88,7 @@ def commission_request(request):
 
     return render(request, "commissions/request.html", {
         "form": form,
-        "page_title": "Request a Custom Commission — DarkForge Art",
+        "page_title": "Request a Custom Commission - DarkForge Art",
     })
 
 
@@ -100,7 +100,7 @@ def my_commissions(request):
     ).order_by("-created_at")
     return render(request, "commissions/my_commissions.html", {
         "commissions": commissions,
-        "page_title": "My Commissions — DarkForge Art",
+        "page_title": "My Commissions - DarkForge Art",
     })
 
 
@@ -179,7 +179,7 @@ def admin_commissions_list(request):
         "commissions": commissions,
         "status_choices": Commission.Status.choices,
         "selected_status": status_filter,
-        "page_title": "Commissions — Admin",
+        "page_title": "Commissions - Admin",
     })
 
 

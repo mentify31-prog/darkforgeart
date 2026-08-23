@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Gallery — DarkForge Art{% endblock %}
+{% block title %}Gallery - DarkForge Art{% endblock %}
 
 {% block content %}
 <section style="padding-top:2rem;">
@@ -52,7 +52,7 @@
             {% if artwork.preview_public_url %}
             <img
               src="{{ artwork.preview_public_url }}"
-              alt="{{ artwork.title }} — dark art preview"
+              alt="{{ artwork.title }} - dark art preview"
               loading="lazy"
               style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease,filter 0.4s ease;"
               class="gallery-img"

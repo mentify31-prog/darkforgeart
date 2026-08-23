@@ -2,9 +2,9 @@
 payments/views.py
 
 Paystack payment flow for DarkForge Art:
-1. InitiatePaymentView  — creates order + Paystack transaction
-2. VerifyPaymentView    — Paystack callback URL, verifies transaction
-3. PaystackWebhookView  — Paystack webhook, idempotent fulfillment trigger
+1. InitiatePaymentView - creates order + Paystack transaction
+2. VerifyPaymentView - Paystack callback URL, verifies transaction
+3. PaystackWebhookView - Paystack webhook, idempotent fulfillment trigger
 """
 import hashlib
 import hmac
@@ -176,7 +176,7 @@ def initiate_payment(request):
 
     if status_code not in (200, 201) or not body.get("status"):
         logger.error("Paystack init failed: %s %s", status_code, body)
-        order.delete()  # Roll back order — not yet paid
+        order.delete()  # Roll back order - not yet paid
         messages.error(request, paystack.friendly_error(body, "Payment initialization failed."))
         return redirect("orders:checkout")
 
@@ -297,9 +297,9 @@ def _mark_payment_success(payment: Payment, raw_response: dict):
 def _fulfill_order(order: Order):
     """
     Post-payment fulfillment:
-    - Digital: create DigitalDelivery, send download email
-    - Physical: submit Printful/Printify order
-    - Limited: increment edition count, create digital delivery if applicable
+ - Digital: create DigitalDelivery, send download email
+ - Physical: submit Printful/Printify order
+ - Limited: increment edition count, create digital delivery if applicable
     """
     for item in order.items.select_related(
         "product__digital_detail",

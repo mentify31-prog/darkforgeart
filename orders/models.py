@@ -62,7 +62,7 @@ class Order(models.Model):
     shipping_address = models.JSONField(
         default=dict,
         blank=True,
-        help_text=_("Shipping address JSON — required for physical products"),
+        help_text=_("Shipping address JSON - required for physical products"),
     )
     notes = models.TextField(blank=True)
 
@@ -74,7 +74,7 @@ class Order(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.order_number} — {self.status}"
+        return f"{self.order_number} - {self.status}"
 
     @property
     def is_paid(self) -> bool:

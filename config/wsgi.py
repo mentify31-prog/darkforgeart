@@ -1,5 +1,5 @@
 """
-DarkForge Art — WSGI Configuration
+DarkForge Art - WSGI Configuration
 """
 
 import os

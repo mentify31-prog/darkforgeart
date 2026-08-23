@@ -24,9 +24,9 @@ class Commission(models.Model):
     """
 
     class Tier(models.TextChoices):
-        BASIC = "basic", _("Basic — Digital artwork")
-        PREMIUM = "premium", _("Premium — Custom + revisions")
-        COMMERCIAL = "commercial", _("Commercial — Business / brand use")
+        BASIC = "basic", _("Basic - Digital artwork")
+        PREMIUM = "premium", _("Premium - Custom + revisions")
+        COMMERCIAL = "commercial", _("Commercial - Business / brand use")
 
     class Status(models.TextChoices):
         SUBMITTED = "submitted", _("Submitted")
@@ -125,7 +125,7 @@ class Commission(models.Model):
     final_file_url = models.CharField(
         max_length=512,
         blank=True,
-        help_text=_("GitHub stored_path for the final delivered file — released after final payment"),
+        help_text=_("GitHub stored_path for the final delivered file - released after final payment"),
     )
 
     # ── Admin ─────────────────────────────────────────────────────────────────
@@ -143,7 +143,7 @@ class Commission(models.Model):
 
     @property
     def display_price(self):
-        return self.quoted_price or "—"
+        return self.quoted_price or " - "
 
     def set_quote(self, quoted_price: float, deposit_pct: float = 0.5):
         """Set the quoted price and calculate deposit/final amounts."""
@@ -195,7 +195,7 @@ class CommissionRevision(models.Model):
         ordering = ["revision_number"]
 
     def __str__(self):
-        return f"Revision {self.revision_number} — {self.commission.title}"
+        return f"Revision {self.revision_number} - {self.commission.title}"
 
     def get_preview_public_url(self):
         from services.github_storage import github_public_url

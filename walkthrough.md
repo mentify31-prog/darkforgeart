@@ -1,4 +1,4 @@
-# DarkForge Art — Platform Walkthrough & Architecture Report
+# DarkForge Art - Platform Walkthrough & Architecture Report
 
 The **DarkForge Art** Django e-commerce & commission platform has been completely built, configured, and verified.
 
@@ -93,10 +93,10 @@ graph TD
    ```
 
 2. **Database Migrations**:
-   - All 7 apps (`accounts`, `gallery`, `store`, `orders`, `commissions`, `payments`, `fulfillment`) successfully generated and applied migrations to `DarkForgeArt` MySQL database.
+ - All 7 apps (`accounts`, `gallery`, `store`, `orders`, `commissions`, `payments`, `fulfillment`) successfully generated and applied migrations to `DarkForgeArt` MySQL database.
 
 3. **Development Server**:
-   - Verified clean execution on `http://127.0.0.1:8000`.
+ - Verified clean execution on `http://127.0.0.1:8000`.
 
 ---
 

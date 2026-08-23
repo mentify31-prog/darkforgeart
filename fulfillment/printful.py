@@ -1,7 +1,7 @@
 """
 fulfillment/printful.py
 
-PrintfulProvider — implements FulfillmentProviderBase for Printful's REST API.
+PrintfulProvider - implements FulfillmentProviderBase for Printful's REST API.
 Docs: https://developers.printful.com/docs/
 """
 from __future__ import annotations

@@ -23,7 +23,7 @@ class ArtworkImageInline(admin.TabularInline):
 class ArtworkAdminForm(forms.ModelForm):
     """
     Admin form that accepts file uploads and pushes them to GitHub.
-    The file fields are optional — if a stored_path is already set and no new file
+    The file fields are optional - if a stored_path is already set and no new file
     is uploaded, the existing path is preserved.
     """
     upload_original = forms.FileField(required=False, label="Upload Original Pencil Scan")
@@ -48,7 +48,7 @@ class ArtworkAdminForm(forms.ModelForm):
         try:
             github = get_github_service()
         except ValueError:
-            # GitHub not configured — skip uploads, save as-is
+            # GitHub not configured - skip uploads, save as-is
             if commit:
                 artwork.save()
                 self.save_m2m()
@@ -158,7 +158,7 @@ class ArtworkAdmin(admin.ModelAdmin):
         url = obj.get_preview_public_url()
         if url:
             return format_html('<img src="{}" style="height:50px;border-radius:4px;" />', url)
-        return "—"
+        return " - "
     preview_thumb.short_description = "Preview"
 
     def final_url_warning(self, obj):

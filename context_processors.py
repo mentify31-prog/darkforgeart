@@ -1,5 +1,5 @@
 """
-context_processors.py — Global template context
+context_processors.py - Global template context
 
 Injects site-wide variables into every template.
 """

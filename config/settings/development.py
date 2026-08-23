@@ -1,5 +1,5 @@
 """
-DarkForge Art — Development Settings
+DarkForge Art - Development Settings
 """
 
 from .base import *  # noqa: F401, F403

@@ -79,7 +79,7 @@ class Payment(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"Payment {self.paystack_reference} — {self.status} ({self.amount} {self.currency})"
+        return f"Payment {self.paystack_reference} - {self.status} ({self.amount} {self.currency})"
 
     @property
     def is_successful(self) -> bool:

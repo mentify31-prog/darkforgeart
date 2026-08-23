@@ -2,7 +2,7 @@
 services/paystack.py
 
 Thin wrapper around the Paystack REST API.
-Framework-agnostic — no Django imports here.
+Framework-agnostic - no Django imports here.
 Adapted from EduAI services/paystack_service.py.
 """
 from __future__ import annotations

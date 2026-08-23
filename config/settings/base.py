@@ -1,5 +1,5 @@
 """
-DarkForge Art — Base Settings
+DarkForge Art - Base Settings
 Shared across all environments. Sensitive values come from .env.
 """
 
@@ -23,6 +23,12 @@ ALLOWED_HOSTS = [h.strip() for h in raw_hosts if h.strip()]
 RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# Base URL for absolute links (emails, Paystack callbacks, downloads)
+BASE_URL = os.environ.get(
+    "BASE_URL",
+    f"https://{RENDER_EXTERNAL_HOSTNAME}" if RENDER_EXTERNAL_HOSTNAME else "http://localhost:8000"
+).rstrip("/")
 
 # CSRF Trusted Origins
 raw_csrf = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
@@ -99,7 +105,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 
-# ─── Database — MySQL (mysqlclient, utf8mb4) ───────────────────────────────────
+# ─── Database - MySQL (mysqlclient, utf8mb4) ───────────────────────────────────
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
@@ -165,7 +171,7 @@ CACHES = {
 }
 
 
-# ─── Media (local dev only — prod uses GitHub raw URLs) ───────────────────────
+# ─── Media (local dev only - prod uses GitHub raw URLs) ───────────────────────
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 

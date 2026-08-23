@@ -1,5 +1,5 @@
 """
-DarkForge Art — Root URL Configuration
+DarkForge Art - Root URL Configuration
 """
 
 from django.contrib import admin

@@ -1,7 +1,7 @@
 """
 fulfillment/models.py
 
-FulfillmentOrder — tracks a POD order placed with Printful or Printify.
+FulfillmentOrder - tracks a POD order placed with Printful or Printify.
 
 Table prefix: dfa_
 """
@@ -77,5 +77,5 @@ class FulfillmentOrder(models.Model):
     def __str__(self):
         return (
             f"Fulfillment {self.get_provider_display()} #{self.external_order_id or 'pending'} "
-            f"— {self.status}"
+            f" - {self.status}"
         )
