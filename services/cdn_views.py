@@ -27,57 +27,52 @@ def _guess_content_type(filepath: str, upstream_type: str | None = None) -> str:
 
 def _fetch_github_asset(owner: str, repo: str, ref: str, filepath: str) -> tuple[bytes, str]:
     # 1. Check local disk cache first (0ms response time!)
-    cache_key = f"{owner}_{repo}_{ref}_{filepath.replace('/', '_')}"
+    clean_path = unquote(filepath).lstrip("/")
+    cache_key = f"{owner}_{repo}_{ref}_{clean_path.replace('/', '_')}"
     cache_file = CACHE_DIR / cache_key
     if cache_file.exists():
         try:
-            return cache_file.read_bytes(), _guess_content_type(filepath)
+            data = cache_file.read_bytes()
+            if len(data) > 0:
+                return data, _guess_content_type(clean_path)
         except Exception:
             pass
 
-    # 2. Fetch from GitHub if not yet cached locally
-    filepath = unquote(filepath)
-    encoded_path = quote(filepath, safe="/")
-    raw_url = f"https://raw.githubusercontent.com/{owner}/{repo}/{ref}/{encoded_path}"
-
+    # 2. Fetch from GitHub via authenticated Contents API with raw media header
     token = getattr(settings, "GITHUB_TOKEN", "").strip()
-    headers: dict[str, str] = {}
-    if token:
-        headers["Authorization"] = f"token {token}"
-
+    encoded_path = quote(clean_path, safe="/")
     content = None
-    content_type = _guess_content_type(filepath)
+    content_type = _guess_content_type(clean_path)
 
-    try:
-        upstream = requests.get(raw_url, headers=headers, timeout=15)
-        if upstream.status_code == 200:
-            content = upstream.content
-            content_type = _guess_content_type(filepath, upstream.headers.get("Content-Type"))
-    except requests.RequestException:
-        pass
-
-    if content is None:
-        if not token:
-            raise Http404("Asset not found")
-
-        api_headers = {
+    if token:
+        api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{encoded_path}"
+        headers = {
             "Authorization": f"token {token}",
-            "Accept": "application/vnd.github+json",
+            "Accept": "application/vnd.github.v3.raw",
         }
-        api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{quote(filepath, safe='/')}"
         try:
-            api_resp = requests.get(api_url, headers=api_headers, params={"ref": ref}, timeout=15)
-            if api_resp.status_code == 200:
-                data = api_resp.json()
-                if isinstance(data, dict) and "content" in data:
-                    content = base64.b64decode(data["content"].replace("\n", ""))
+            api_resp = requests.get(api_url, headers=headers, params={"ref": ref}, timeout=20)
+            if api_resp.status_code == 200 and len(api_resp.content) > 0:
+                content = api_resp.content
+                content_type = _guess_content_type(clean_path, api_resp.headers.get("Content-Type"))
         except requests.RequestException:
             pass
 
+    # 3. Fallback: try raw.githubusercontent.com for public repos
     if content is None:
+        raw_url = f"https://raw.githubusercontent.com/{owner}/{repo}/{ref}/{encoded_path}"
+        try:
+            upstream = requests.get(raw_url, timeout=15)
+            if upstream.status_code == 200 and len(upstream.content) > 0:
+                content = upstream.content
+                content_type = _guess_content_type(clean_path, upstream.headers.get("Content-Type"))
+        except requests.RequestException:
+            pass
+
+    if content is None or len(content) == 0:
         raise Http404("Asset not found")
 
-    # 3. Save to local disk cache for all future requests
+    # 4. Save to local disk cache for all future requests
     try:
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
         cache_file.write_bytes(content)

@@ -55,7 +55,9 @@ def upload_product_mockup_files(physical_product: Any, files_list: list) -> list
                     subdir="mockups",
                     filename_prefix=slug,
                 )
-                if res and res.public_url:
+                if res and res.repo_path:
+                    url = f"/cdn/assets/{res.repo_path.lstrip('/')}"
+                elif res and res.public_url:
                     url = res.public_url
             except Exception as exc:
                 logger.error("GitHub mockup upload error for %s: %s", f.name, exc)
