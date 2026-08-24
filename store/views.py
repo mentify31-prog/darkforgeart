@@ -3,9 +3,11 @@ store/views.py
 
 Shop views: product listing, product detail, cart management.
 """
+import csv
+import xml.etree.ElementTree as ET
 from django.conf import settings
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
 
@@ -191,3 +193,110 @@ def update_cart(request, key):
     request.session["cart"] = cart_data
     request.session.modified = True
     return redirect("store:cart")
+
+
+def pinterest_catalog_feed(request, fmt="csv"):
+    """
+    Dynamically generates a Pinterest / Google Shopping Product Data Feed (CSV or XML format).
+    Pinterest & Google fetch this URL to auto-publish Shoppable Product Pins.
+    """
+    base_url = getattr(settings, "BASE_URL", "https://darkforgeart.store").rstrip("/")
+    if not base_url.startswith("http"):
+        base_url = f"https://{base_url}"
+
+    active_products = Product.objects.filter(is_active=True).select_related(
+        "artwork", "physical_detail", "digital_detail"
+    ).prefetch_related("physical_detail__variants")
+
+    feed_items = []
+
+    for prod in active_products:
+        prod_link = f"{base_url}/shop/product/{prod.slug}/"
+
+        # Resolve image link
+        img_url = prod.preview_url or ""
+        if img_url and img_url.startswith("/"):
+            img_url = f"{base_url}{img_url}"
+
+        description = prod.description or f"High quality {prod.title} from DarkForge Art."
+        clean_desc = description.replace("\n", " ").replace("\r", " ").strip()
+
+        phys = getattr(prod, "physical_detail", None)
+        variants = list(phys.variants.filter(stock_available=True)) if phys else []
+
+        if variants:
+            for v in variants:
+                var_title = f"{prod.title}"
+                specs = [s for s in (v.color, v.size) if s]
+                if specs:
+                    var_title += f" ({' / '.join(specs)})"
+
+                v_price = v.effective_price_usd or prod.price_usd
+                sku = f"{prod.slug}-v{v.pk}"
+
+                feed_items.append({
+                    "id": sku,
+                    "item_group_id": prod.slug,
+                    "title": var_title[:150],
+                    "description": clean_desc[:9000],
+                    "link": prod_link,
+                    "image_link": img_url,
+                    "price": f"{v_price:.2f} USD",
+                    "availability": "in stock",
+                    "condition": "new",
+                    "brand": "DarkForge Art",
+                    "google_product_category": "Apparel & Accessories",
+                })
+        else:
+            sku = prod.slug
+            feed_items.append({
+                "id": sku,
+                "item_group_id": prod.slug,
+                "title": prod.title[:150],
+                "description": clean_desc[:9000],
+                "link": prod_link,
+                "image_link": img_url,
+                "price": f"{prod.price_usd:.2f} USD",
+                "availability": "in stock",
+                "condition": "new",
+                "brand": "DarkForge Art",
+                "google_product_category": "Apparel & Accessories",
+            })
+
+    if fmt == "xml":
+        rss = ET.Element("rss", {"version": "2.0", "xmlns:g": "http://base.google.com/ns/1.0"})
+        channel = ET.SubElement(rss, "channel")
+        ET.SubElement(channel, "title").text = "DarkForge Art Product Feed"
+        ET.SubElement(channel, "link").text = base_url
+        ET.SubElement(channel, "description").text = "Shoppable product feed for DarkForge Art"
+
+        for item in feed_items:
+            item_elem = ET.SubElement(channel, "item")
+            ET.SubElement(item_elem, "g:id").text = item["id"]
+            ET.SubElement(item_elem, "g:item_group_id").text = item["item_group_id"]
+            ET.SubElement(item_elem, "title").text = item["title"]
+            ET.SubElement(item_elem, "description").text = item["description"]
+            ET.SubElement(item_elem, "link").text = item["link"]
+            ET.SubElement(item_elem, "g:image_link").text = item["image_link"]
+            ET.SubElement(item_elem, "g:price").text = item["price"]
+            ET.SubElement(item_elem, "g:availability").text = item["availability"]
+            ET.SubElement(item_elem, "g:condition").text = item["condition"]
+            ET.SubElement(item_elem, "g:brand").text = item["brand"]
+
+        xml_bytes = ET.tostring(rss, encoding="utf-8", xml_declaration=True)
+        return HttpResponse(xml_bytes, content_type="application/xml; charset=utf-8")
+
+    # Default CSV format
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = 'inline; filename="pinterest_catalog.csv"'
+
+    fieldnames = [
+        "id", "item_group_id", "title", "description", "link",
+        "image_link", "price", "availability", "condition", "brand", "google_product_category"
+    ]
+    writer = csv.DictWriter(response, fieldnames=fieldnames)
+    writer.writeheader()
+    for item in feed_items:
+        writer.writerow(item)
+
+    return response
