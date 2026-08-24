@@ -68,15 +68,24 @@ class Command(BaseCommand):
                     "printify_product_id": p_id,
                 }
             )
-            phys.fulfillment_provider = FulfillmentProvider.PRINTIFY
-            phys.printify_product_id = p_id
-            phys.mockup_images = all_mockup_urls
+            # Preserve any custom uploaded mockup URLs (e.g. /cdn/assets/, /media/, GitHub URLs)
+            existing_custom_mockups = [
+                url for url in (phys.mockup_images or [])
+                if url and (url.startswith("/cdn/assets/") or url.startswith("/media/") or "github" in url)
+            ]
+
+            combined_mockups = list(all_mockup_urls)
+            for custom_url in existing_custom_mockups:
+                if custom_url not in combined_mockups:
+                    combined_mockups.append(custom_url)
+
+            phys.mockup_images = combined_mockups
 
             default_img = next((img for img in images if img.get("is_default")), None)
             if default_img and default_img.get("src"):
                 phys.mockup_image_url = default_img["src"]
-            elif all_mockup_urls:
-                phys.mockup_image_url = all_mockup_urls[0]
+            elif combined_mockups:
+                phys.mockup_image_url = combined_mockups[0]
             phys.save()
 
             added_vars = 0
