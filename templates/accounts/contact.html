@@ -3,126 +3,308 @@
 {% block title %}Contact Support - DarkForge Art{% endblock %}
 
 {% block content %}
-<section style="padding-top:2rem;">
-  <div class="container" style="max-width:960px;">
-    <div style="margin-bottom:2.5rem;text-align:center;">
-      <p class="text-upper text-accent" style="margin-bottom:0.4rem;">Customer Support</p>
-      <h1 style="font-size:2.2rem;margin-bottom:0.75rem;">Get in Touch</h1>
-      <p style="color:var(--color-text-muted);max-width:600px;margin:0 auto;font-size:0.95rem;line-height:1.6;">
-        Have questions about orders, digital downloads, licensing, custom commissions, or complaints? Submit your message below and our support team will reach out by email.
+<section class="support-page">
+  <div class="container support-container">
+    <div class="support-header">
+      <p class="text-upper text-accent">Customer Support</p>
+      <h1>Get in Touch</h1>
+      <p>
+        Have questions about orders, digital downloads, licensing, custom commissions, or complaints?
+        Submit your message below and our support team will reach out by email.
       </p>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 340px;gap:2.5rem;align-items:flex-start;">
-      {# Left: Form #}
-      <div style="background:var(--color-surface);border:1px solid var(--color-border);padding:2rem;">
-        <h2 style="font-family:var(--font-display);font-size:1.25rem;color:var(--color-white);margin-bottom:1.5rem;">Send Us a Message</h2>
+    <div class="support-layout">
+      <div class="support-panel support-form-panel">
+        <h2>Send Us a Message</h2>
 
         <form method="post" action="{% url 'accounts:contact' %}" novalidate>
           {% csrf_token %}
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-            <div class="form-group" style="margin:0;">
-              <label for="id_name" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted);display:block;margin-bottom:0.3rem;">Your Name</label>
+          <div class="support-form-row">
+            <div class="form-group">
+              <label for="id_name">Your Name</label>
               {{ form.name }}
-              {% if form.name.errors %}<div style="color:var(--color-accent-light);font-size:0.75rem;margin-top:0.25rem;">{{ form.name.errors.0 }}</div>{% endif %}
+              {% if form.name.errors %}<div class="support-field-error">{{ form.name.errors.0 }}</div>{% endif %}
             </div>
 
-            <div class="form-group" style="margin:0;">
-              <label for="id_email" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted);display:block;margin-bottom:0.3rem;">Email Address</label>
+            <div class="form-group">
+              <label for="id_email">Email Address</label>
               {{ form.email }}
-              {% if form.email.errors %}<div style="color:var(--color-accent-light);font-size:0.75rem;margin-top:0.25rem;">{{ form.email.errors.0 }}</div>{% endif %}
+              {% if form.email.errors %}<div class="support-field-error">{{ form.email.errors.0 }}</div>{% endif %}
             </div>
           </div>
 
-          <div class="form-group" style="margin-bottom:1rem;">
-            <label for="id_category" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted);display:block;margin-bottom:0.3rem;">Inquiry Category</label>
+          <div class="form-group">
+            <label for="id_category">Inquiry Category</label>
             {{ form.category }}
-            {% if form.category.errors %}<div style="color:var(--color-accent-light);font-size:0.75rem;margin-top:0.25rem;">{{ form.category.errors.0 }}</div>{% endif %}
+            {% if form.category.errors %}<div class="support-field-error">{{ form.category.errors.0 }}</div>{% endif %}
           </div>
 
-          <div class="form-group" style="margin-bottom:1rem;">
-            <label for="id_subject" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted);display:block;margin-bottom:0.3rem;">Subject</label>
+          <div class="form-group">
+            <label for="id_subject">Subject</label>
             {{ form.subject }}
-            {% if form.subject.errors %}<div style="color:var(--color-accent-light);font-size:0.75rem;margin-top:0.25rem;">{{ form.subject.errors.0 }}</div>{% endif %}
+            {% if form.subject.errors %}<div class="support-field-error">{{ form.subject.errors.0 }}</div>{% endif %}
           </div>
 
-          <div class="form-group" style="margin-bottom:1.25rem;">
-            <label for="id_message" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted);display:block;margin-bottom:0.3rem;">How can we help?</label>
+          <div class="form-group">
+            <label for="id_message">How can we help?</label>
             {{ form.message }}
-            {% if form.message.errors %}<div style="color:var(--color-accent-light);font-size:0.75rem;margin-top:0.25rem;">{{ form.message.errors.0 }}</div>{% endif %}
+            {% if form.message.errors %}<div class="support-field-error">{{ form.message.errors.0 }}</div>{% endif %}
           </div>
 
-          <div style="display:flex;align-items:flex-start;gap:0.6rem;margin-bottom:1.5rem;">
+          <div class="support-consent-row">
             {{ form.consent }}
-            <label for="id_consent" style="font-size:0.8rem;color:var(--color-text-muted);cursor:pointer;margin:0;line-height:1.4;">
+            <label for="id_consent">
               I consent to being contacted via email regarding this inquiry.
             </label>
           </div>
-          {% if form.consent.errors %}<div style="color:var(--color-accent-light);font-size:0.75rem;margin-bottom:1rem;">{{ form.consent.errors.0 }}</div>{% endif %}
+          {% if form.consent.errors %}<div class="support-field-error support-consent-error">{{ form.consent.errors.0 }}</div>{% endif %}
 
-          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">
-            Submit Support Request →
+          <button type="submit" class="btn btn-primary support-submit-btn">
+            Submit Support Request &rarr;
           </button>
         </form>
       </div>
 
-      {# Right: Info Cards #}
-      <div style="display:flex;flex-direction:column;gap:1.5rem;">
-        <div style="background:var(--color-surface);border:1px solid var(--color-border);padding:1.75rem;">
-          <h3 style="font-family:var(--font-display);font-size:1.1rem;color:var(--color-white);margin-bottom:1.25rem;">Support Info</h3>
+      <aside class="support-side" aria-label="Support information">
+        <div class="support-panel support-info-panel">
+          <h3>Support Info</h3>
 
-          <div style="margin-bottom:1.25rem;">
-            <p class="text-upper text-accent" style="font-size:0.7rem;margin-bottom:0.2rem;">Direct Email</p>
-            <p style="font-size:0.9rem;color:var(--color-white);margin:0;">
-              <a href="mailto:contact@darkforgeart.store" style="color:var(--color-white);text-decoration:underline;">contact@darkforgeart.store</a>
+          <div class="support-info-item">
+            <p class="text-upper text-accent">Direct Email</p>
+            <p>
+              <a href="mailto:contact@darkforgeart.store" class="support-email-link">contact@darkforgeart.store</a>
             </p>
           </div>
 
-          <div style="margin-bottom:1.25rem;">
-            <p class="text-upper text-accent" style="font-size:0.7rem;margin-bottom:0.2rem;">Response Time</p>
-            <p style="font-size:0.9rem;color:var(--color-white);margin:0;">Within 24 hours (Mon - Fri)</p>
+          <div class="support-info-item">
+            <p class="text-upper text-accent">Response Time</p>
+            <p>Within 24 hours (Mon - Fri)</p>
           </div>
 
-          <div>
-            <p class="text-upper text-accent" style="font-size:0.7rem;margin-bottom:0.2rem;">Global Operations</p>
-            <p style="font-size:0.9rem;color:var(--color-white);margin:0;">Worldwide Digital Delivery &amp; Merchandise Shipping</p>
+          <div class="support-info-item">
+            <p class="text-upper text-accent">Global Operations</p>
+            <p>Worldwide digital delivery and merchandise shipping.</p>
           </div>
         </div>
 
-        <div style="background:var(--color-surface);border:1px solid var(--color-border);padding:1.5rem;">
-          <h4 style="font-size:0.9rem;color:var(--color-white);margin-bottom:0.75rem;">Quick Self-Service</h4>
-          <div style="display:flex;flex-direction:column;gap:0.5rem;font-size:0.85rem;">
+        <div class="support-panel support-quick-panel">
+          <h4>Quick Self-Service</h4>
+          <div class="support-quick-links">
             {% if user.is_authenticated %}
-            <a href="{% url 'accounts:dashboard' %}" style="color:var(--color-accent-light);text-decoration:none;">View My Dashboard &amp; Orders →</a>
+            <a href="{% url 'accounts:dashboard' %}">View My Dashboard &amp; Orders &rarr;</a>
             {% endif %}
-            <a href="{% url 'commissions:commission_request' %}" style="color:var(--color-text-muted);text-decoration:none;">Request Custom Art Commission →</a>
-            <a href="{% url 'gallery:gallery' %}" style="color:var(--color-text-muted);text-decoration:none;">Browse Artwork Gallery →</a>
+            <a href="{% url 'commissions:commission_request' %}">Request Custom Art Commission &rarr;</a>
+            <a href="{% url 'gallery:gallery' %}">Browse Artwork Gallery &rarr;</a>
           </div>
         </div>
-      </div>
+      </aside>
     </div>
   </div>
 </section>
 
 <style>
-.form-group input[type="text"],
-.form-group input[type="email"],
-.form-group select,
-.form-group textarea {
+.support-page {
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+}
+.support-container {
+  max-width: 960px;
+}
+.support-header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+.support-header .text-upper {
+  margin-bottom: 0.4rem;
+}
+.support-header h1 {
+  font-size: clamp(1.85rem, 6vw, 2.2rem);
+  margin-bottom: 0.75rem;
+}
+.support-header p {
+  color: var(--color-text-muted);
+  max-width: 600px;
+  margin: 0 auto;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.support-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  gap: 2.5rem;
+  align-items: flex-start;
+}
+.support-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  min-width: 0;
+}
+.support-form-panel {
+  padding: 2rem;
+}
+.support-form-panel h2,
+.support-info-panel h3 {
+  font-family: var(--font-display);
+  color: var(--color-white);
+  margin-bottom: 1.5rem;
+}
+.support-form-panel h2 {
+  font-size: 1.25rem;
+}
+.support-info-panel h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1.25rem;
+}
+.support-form-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+}
+.support-form-panel .form-group {
+  margin-bottom: 1rem;
+  min-width: 0;
+}
+.support-form-panel label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  display: block;
+  margin-bottom: 0.3rem;
+}
+.support-form-panel input[type="text"],
+.support-form-panel input[type="email"],
+.support-form-panel select,
+.support-form-panel textarea {
   background: var(--color-bg);
   color: var(--color-text);
   border: 1px solid var(--color-border);
-  padding: 0.6rem 0.85rem;
+  padding: 0.65rem 0.85rem;
   width: 100%;
+  max-width: 100%;
   font-size: 0.875rem;
   border-radius: 2px;
 }
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.support-form-panel input:focus,
+.support-form-panel select:focus,
+.support-form-panel textarea:focus {
   border-color: var(--color-accent);
   outline: none;
+}
+.support-consent-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin: 0.25rem 0 1.5rem;
+}
+.support-consent-row input {
+  flex: 0 0 auto;
+  margin-top: 0.2rem;
+}
+.support-consent-row label {
+  margin: 0;
+  line-height: 1.45;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.support-submit-btn {
+  width: 100%;
+  justify-content: center;
+}
+.support-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
+}
+.support-info-panel {
+  padding: 1.75rem;
+}
+.support-quick-panel {
+  padding: 1.5rem;
+}
+.support-info-item {
+  margin-bottom: 1.25rem;
+}
+.support-info-item:last-child {
+  margin-bottom: 0;
+}
+.support-info-item .text-upper {
+  font-size: 0.7rem;
+  margin-bottom: 0.2rem;
+}
+.support-info-item p {
+  font-size: 0.9rem;
+  color: var(--color-white);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.support-email-link {
+  color: var(--color-white);
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+}
+.support-quick-panel h4 {
+  font-size: 0.9rem;
+  color: var(--color-white);
+  margin-bottom: 0.75rem;
+}
+.support-quick-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  font-size: 0.85rem;
+}
+.support-quick-links a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  line-height: 1.45;
+}
+.support-quick-links a:hover {
+  color: var(--color-white);
+}
+.support-field-error {
+  color: var(--color-accent-light);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+.support-consent-error {
+  margin-bottom: 1rem;
+}
+@media (max-width: 860px) {
+  .support-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+  .support-side {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .support-page {
+    padding-top: 1.25rem;
+    padding-bottom: 3rem;
+  }
+  .support-header {
+    text-align: left;
+    margin-bottom: 1.75rem;
+  }
+  .support-header p {
+    margin: 0;
+  }
+  .support-form-panel,
+  .support-info-panel,
+  .support-quick-panel {
+    padding: 1.25rem;
+  }
+  .support-form-row,
+  .support-side {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>
 {% endblock %}
