@@ -18,6 +18,7 @@ SITEMAPS = {
 }
 
 from services.cdn_views import assets_proxy, github_asset_proxy
+from accounts.views import refund_policy, terms_privacy_policy
 
 urlpatterns = [
     # Django built-in admin (keep for superuser access)
@@ -35,6 +36,12 @@ urlpatterns = [
     path("commissions/", include("commissions.urls", namespace="commissions")),
     path("payments/", include("payments.urls", namespace="payments")),
     path("fulfillment/", include("fulfillment.urls", namespace="fulfillment")),
+
+    # Direct Policy Shortcuts (for Merchant Scanners)
+    path("returns-policy/", refund_policy, name="refund_policy_root"),
+    path("refund-policy/", refund_policy, name="refund_policy_root_alias"),
+    path("privacy-policy/", terms_privacy_policy, name="privacy_policy_root"),
+    path("terms/", terms_privacy_policy, name="terms_root"),
 
     # SEO
     path("sitemap.xml", sitemap, {"sitemaps": SITEMAPS}, name="django.contrib.sitemaps.views.sitemap"),

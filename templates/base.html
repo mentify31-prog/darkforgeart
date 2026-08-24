@@ -216,13 +216,14 @@
       </div>
 
       <div class="footer-links">
-        <h4>Support &amp; Account</h4>
+        <h4>Policies &amp; Support</h4>
         <ul>
+          <li><a href="{% url 'accounts:refund_policy' %}">Return &amp; Refund Policy</a></li>
+          <li><a href="{% url 'accounts:terms_privacy' %}">Terms &amp; Privacy Policy</a></li>
           <li><a href="{% url 'accounts:contact' %}">Contact Support</a></li>
           {% if user.is_authenticated %}
           <li><a href="{{ user.get_dashboard_url }}">Dashboard</a></li>
           <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
-          <li><a href="{% url 'commissions:my_commissions' %}">My Commissions</a></li>
           {% else %}
           <li><a href="{% url 'accounts:login' %}">Sign In</a></li>
           <li><a href="{% url 'accounts:register' %}">Create Account</a></li>

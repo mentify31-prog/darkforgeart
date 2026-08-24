@@ -513,3 +513,21 @@ def contact(request):
         "page_title": "Contact Support - DarkForge Art",
     }
     return render(request, "accounts/contact.html", context)
+
+
+def refund_policy(request):
+    """Render explicit Return & Refund Policy page for merchant guidelines compliance."""
+    context = {
+        "page_title": "Return & Refund Policy - DarkForge Art",
+        "meta_description": "DarkForge Art Return, Refund and Replacement Policy for physical merchandise and digital products.",
+    }
+    return render(request, "legal/refund_policy.html", context)
+
+
+def terms_privacy_policy(request):
+    """Render Terms of Service & Privacy Policy page."""
+    context = {
+        "page_title": "Terms of Service & Privacy Policy - DarkForge Art",
+        "meta_description": "Terms of Service, Shipping Guidelines, and Privacy Policy for DarkForge Art.",
+    }
+    return render(request, "legal/terms_privacy.html", context)

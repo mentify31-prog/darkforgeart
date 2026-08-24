@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Return &amp; Refund Policy - DarkForge Art{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:880px;padding:3rem 1rem;line-height:1.75;">
+  <div style="margin-bottom:2rem;text-align:center;">
+    <h1 style="font-family:'Cinzel',serif;font-size:2.25rem;margin-bottom:0.5rem;color:var(--color-text-title);">Return &amp; Refund Policy</h1>
+    <p style="color:var(--color-text-muted);font-size:0.9rem;">Effective Date: August 24, 2026</p>
+  </div>
+
+  <div class="card" style="background:var(--color-card-bg);border:1px solid var(--color-border);padding:2rem;border-radius:6px;margin-bottom:1.75rem;">
+    <h2 style="font-size:1.25rem;color:var(--color-text-title);margin-bottom:1rem;font-family:'Cinzel',serif;">1. Overview</h2>
+    <p>At <strong>DarkForge Art</strong>, customer satisfaction is our top priority. We want you to love your artwork, apparel, wall decor, and physical merchandise. If your order arrives damaged, defective, or incorrect, we offer a <strong>100% Free Replacement or Full Refund</strong> within 30 days of delivery.</p>
+  </div>
+
+  <div class="card" style="background:var(--color-card-bg);border:1px solid var(--color-border);padding:2rem;border-radius:6px;margin-bottom:1.75rem;">
+    <h2 style="font-size:1.25rem;color:var(--color-text-title);margin-bottom:1rem;font-family:'Cinzel',serif;">2. Damaged, Defective, or Misprinted Merchandise</h2>
+    <p>All our physical products (backpacks, sweatshirts, t-shirts, canvas prints, posters) are printed on demand and fulfilled through our print facilities (Printful &amp; Printify):</p>
+    <ul style="margin-left:1.5rem;margin-top:0.75rem;margin-bottom:1rem;">
+      <li><strong>Replacement Window:</strong> You must contact us within <strong>30 calendar days</strong> of receiving your item if it is damaged, defective, misprinted, or broken during shipping.</li>
+      <li><strong>Proof Required:</strong> Email a clear photo or short video of the defect/damage along with your order number to <a href="mailto:support@darkforgeart.store" style="color:var(--color-accent);text-decoration:underline;">support@darkforgeart.store</a>.</li>
+      <li><strong>Resolution:</strong> We will immediately issue a <strong>100% Free Replacement</strong> shipped directly to you, or process a <strong>Full Refund</strong> back to your original payment method (Credit Card, Paystack, M-Pesa).</li>
+    </ul>
+  </div>
+
+  <div class="card" style="background:var(--color-card-bg);border:1px solid var(--color-border);padding:2rem;border-radius:6px;margin-bottom:1.75rem;">
+    <h2 style="font-size:1.25rem;color:var(--color-text-title);margin-bottom:1rem;font-family:'Cinzel',serif;">3. Lost or Undelivered Packages</h2>
+    <p>If your package tracking indicates it has not been delivered within the estimated carrier delivery window, or if it is declared lost in transit by the carrier, we will issue a free replacement shipment or full refund after verifying carrier tracking.</p>
+  </div>
+
+  <div class="card" style="background:var(--color-card-bg);border:1px solid var(--color-border);padding:2rem;border-radius:6px;margin-bottom:1.75rem;">
+    <h2 style="font-size:1.25rem;color:var(--color-text-title);margin-bottom:1rem;font-family:'Cinzel',serif;">4. Returns &amp; Size Exchanges</h2>
+    <p>If you wish to return an item or request a size exchange:</p>
+    <ul style="margin-left:1.5rem;margin-top:0.75rem;margin-bottom:1rem;">
+      <li>Please contact <a href="mailto:support@darkforgeart.store" style="color:var(--color-accent);text-decoration:underline;">support@darkforgeart.store</a> within <strong>14 calendar days</strong> of delivery.</li>
+      <li>Items must be unworn, unwashed, unused, and in their original packaging condition.</li>
+      <li>Once the returned item is inspected at our facility, your refund will be processed within <strong>3 to 5 business days</strong> back to your original payment method.</li>
+    </ul>
+  </div>
+
+  <div class="card" style="background:var(--color-card-bg);border:1px solid var(--color-border);padding:2rem;border-radius:6px;margin-bottom:1.75rem;">
+    <h2 style="font-size:1.25rem;color:var(--color-text-title);margin-bottom:1rem;font-family:'Cinzel',serif;">5. Digital Downloads &amp; Commercial Licenses</h2>
+    <p>Due to the instant access nature of digital files (4K Wallpapers, digital art packs, and commercial licenses), digital download sales are non-refundable once the file link has been accessed or downloaded. However, if you experience any technical difficulty downloading or opening your files, our support team will assist or re-issue files immediately.</p>
+  </div>
+
+  <div class="card" style="background:var(--color-card-bg);border:1px solid var(--color-border);padding:2rem;border-radius:6px;">
+    <h2 style="font-size:1.25rem;color:var(--color-text-title);margin-bottom:1rem;font-family:'Cinzel',serif;">6. How to Submit a Return / Refund Request</h2>
+    <p>To request a return, exchange, or refund, reach out to us:</p>
+    <ul style="margin-left:1.5rem;margin-top:0.75rem;margin-bottom:1rem;">
+      <li><strong>Email:</strong> <a href="mailto:support@darkforgeart.store" style="color:var(--color-accent);text-decoration:underline;">support@darkforgeart.store</a> or <a href="mailto:contact@darkforgeart.store" style="color:var(--color-accent);text-decoration:underline;">contact@darkforgeart.store</a></li>
+      <li><strong>Support Form:</strong> <a href="{% url 'accounts:contact' %}" style="color:var(--color-accent);text-decoration:underline;">Contact Support Form</a></li>
+      <li><strong>Processing Time:</strong> Support inquiries and refund requests are processed within <strong>24 business hours</strong>.</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

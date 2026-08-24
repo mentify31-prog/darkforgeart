@@ -57,4 +57,8 @@ urlpatterns = [
 
     # Contact Support
     path("contact/", views.contact, name="contact"),
+
+    # Legal & Merchant Policies
+    path("refund-policy/", views.refund_policy, name="refund_policy"),
+    path("terms-privacy/", views.terms_privacy_policy, name="terms_privacy"),
 ]
