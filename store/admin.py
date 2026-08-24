@@ -7,6 +7,7 @@ from django.urls import path
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.core.management import call_command
+from django.utils.safestring import mark_safe
 from .models import (
     Product,
     DigitalProduct,
@@ -47,16 +48,49 @@ class PhysicalProductAdminForm(forms.ModelForm):
         required=False,
         help_text="Select one or multiple mockup images (PNG/JPG) from your computer to upload directly to your GitHub repository and display in the product gallery carousel.",
     )
+    delete_mockups = forms.MultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        help_text="Check any mockup images you wish to delete from this product, then click Save.",
+    )
 
     class Meta:
         model = PhysicalProduct
         fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk and self.instance.mockup_images:
+            choices = []
+            for idx, url in enumerate(self.instance.mockup_images):
+                filename = url.split("/")[-1]
+                choices.append((url, f"Delete Image #{idx + 1} ({filename[:35]})"))
+            self.fields["delete_mockups"].choices = choices
+        else:
+            self.fields["delete_mockups"].choices = []
 
 
 class PhysicalProductInline(admin.StackedInline):
     model = PhysicalProduct
     form = PhysicalProductAdminForm
     extra = 0
+    readonly_fields = ["mockup_gallery_display"]
+
+    def mockup_gallery_display(self, obj):
+        if not obj or not obj.mockup_images:
+            return "No mockup images available."
+        html = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0;">'
+        for idx, url in enumerate(obj.mockup_images):
+            html += f'''
+            <div style="text-align:center;border:1px solid rgba(255,255,255,0.15);padding:6px;background:#1a1a1a;border-radius:4px;width:110px;">
+                <img src="{url}" style="width:98px;height:98px;object-fit:cover;border-radius:2px;display:block;margin-bottom:4px;">
+                <span style="font-size:10px;color:#888;display:block;">#{idx + 1}</span>
+            </div>
+            '''
+        html += '</div>'
+        return mark_safe(html)
+
+    mockup_gallery_display.short_description = "Current Product Mockup Gallery"
 
 
 class PhysicalProductVariantInline(admin.TabularInline):
@@ -79,9 +113,38 @@ class PhysicalProductAdmin(admin.ModelAdmin):
     form = PhysicalProductAdminForm
     list_display = ["product", "fulfillment_provider", "printful_product_id", "printify_product_id"]
     inlines = [PhysicalProductVariantInline]
+    readonly_fields = ["mockup_gallery_display"]
+
+    def mockup_gallery_display(self, obj):
+        if not obj or not obj.mockup_images:
+            return "No mockup images available."
+        html = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0;">'
+        for idx, url in enumerate(obj.mockup_images):
+            html += f'''
+            <div style="text-align:center;border:1px solid rgba(255,255,255,0.15);padding:6px;background:#1a1a1a;border-radius:4px;width:110px;">
+                <img src="{url}" style="width:98px;height:98px;object-fit:cover;border-radius:2px;display:block;margin-bottom:4px;">
+                <span style="font-size:10px;color:#888;display:block;">#{idx + 1}</span>
+            </div>
+            '''
+        html += '</div>'
+        return mark_safe(html)
+
+    mockup_gallery_display.short_description = "Current Product Mockup Gallery"
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
+
+        # 1. Handle mockup deletion
+        delete_urls = form.cleaned_data.get("delete_mockups")
+        if delete_urls:
+            current = list(obj.mockup_images or [])
+            obj.mockup_images = [u for u in current if u not in delete_urls]
+            if obj.mockup_image_url in delete_urls:
+                obj.mockup_image_url = obj.mockup_images[0] if obj.mockup_images else ""
+            obj.save(update_fields=["mockup_images", "mockup_image_url"])
+            self.message_user(request, f"Removed {len(delete_urls)} mockup image(s).", messages.SUCCESS)
+
+        # 2. Handle new mockup uploads
         files = request.FILES.getlist("upload_extra_mockups")
         if files:
             urls = upload_product_mockup_files(obj, files)
@@ -170,8 +233,21 @@ class ProductAdmin(admin.ModelAdmin):
         instances = formset.save()
         for instance in instances:
             if isinstance(instance, PhysicalProduct):
-                # Look for files uploaded in the inline form
                 prefix = formset.prefix
+                
+                # Check for deletions
+                delete_urls = request.POST.getlist(f"{prefix}-0-delete_mockups")
+                if not delete_urls:
+                    delete_urls = request.POST.getlist("delete_mockups")
+                if delete_urls:
+                    current = list(instance.mockup_images or [])
+                    instance.mockup_images = [u for u in current if u not in delete_urls]
+                    if instance.mockup_image_url in delete_urls:
+                        instance.mockup_image_url = instance.mockup_images[0] if instance.mockup_images else ""
+                    instance.save(update_fields=["mockup_images", "mockup_image_url"])
+                    self.message_user(request, f"Removed {len(delete_urls)} mockup image(s).", messages.SUCCESS)
+
+                # Check for new file uploads
                 files = request.FILES.getlist(f"{prefix}-0-upload_extra_mockups")
                 if not files:
                     files = request.FILES.getlist("upload_extra_mockups")

@@ -27,28 +27,33 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR("PRINTFUL_API_KEY is not configured in settings/.env!"))
             return
 
-        # Auto-resolve store_id if not explicitly provided
-        if not provider.store_id:
+        stores_to_check = []
+        if provider.store_id:
+            stores_to_check = [str(provider.store_id)]
+        else:
             stores_res = provider._get("stores")
             if isinstance(stores_res, dict) and stores_res.get("code") == 200:
                 s_list = stores_res.get("result", [])
-                if s_list:
-                    provider.store_id = str(s_list[0].get("id"))
-                    provider.session.headers["X-PF-Store-Id"] = provider.store_id
-                    self.stdout.write(self.style.SUCCESS(f"Auto-selected Printful Store ID: {provider.store_id}"))
+                for s in s_list:
+                    stores_to_check.append(str(s.get("id")))
 
-        res = provider._get("sync/products")
-        if not isinstance(res, dict) or res.get("code") != 200:
-            err = res.get("error", {}).get("message", str(res)) if isinstance(res, dict) else str(res)
-            self.stderr.write(self.style.ERROR(f"Failed to fetch Printful products: {err}"))
+        if not stores_to_check:
+            stores_to_check = [""]
+
+        products_data_with_store = []
+        for s_id in stores_to_check:
+            params = {"store_id": s_id} if s_id else {}
+            res = provider._get("sync/products", params=params)
+            if isinstance(res, dict) and res.get("code") == 200:
+                items = res.get("result", [])
+                for item in items:
+                    products_data_with_store.append((s_id, item))
+
+        if not products_data_with_store:
+            self.stdout.write(self.style.WARNING("No sync products found across your Printful store(s)."))
             return
 
-        products_data = res.get("result", [])
-        if not products_data:
-            self.stdout.write(self.style.WARNING("No sync products found in your Printful store."))
-            return
-
-        self.stdout.write(self.style.SUCCESS(f"Found {len(products_data)} products in Printful store."))
+        self.stdout.write(self.style.SUCCESS(f"Found {len(products_data_with_store)} products across Printful store(s)."))
 
         default_artwork = Artwork.objects.first()
         if not default_artwork:
@@ -57,13 +62,14 @@ class Command(BaseCommand):
 
         rate = getattr(settings, "USD_EXCHANGE_RATE", 130.0)
 
-        for p_item in products_data:
+        for s_id, p_item in products_data_with_store:
             p_id = str(p_item.get("id"))
             p_name = p_item.get("name", "Printful Product")
             thumbnail = p_item.get("thumbnail_url", "")
 
             # Fetch detailed product info + variants
-            detail_res = provider._get(f"sync/products/{p_id}")
+            params = {"store_id": s_id} if s_id else {}
+            detail_res = provider._get(f"sync/products/{p_id}", params=params)
             if not isinstance(detail_res, dict) or detail_res.get("code") != 200:
                 self.stderr.write(self.style.WARNING(f"Could not fetch details for Printful product {p_id} ({p_name})"))
                 continue
@@ -135,14 +141,14 @@ class Command(BaseCommand):
                         "format": "jpg",
                         "files": files_payload,
                     }
-                    path = f"mockup-generator/create-task/{catalog_product_id}?store_id={provider.store_id}"
+                    path = f"mockup-generator/create-task/{catalog_product_id}?store_id={s_id}"
                     sc, task_res = provider._post(path, payload)
                     if sc in (200, 201):
                         task_key = task_res.get("result", {}).get("task_key")
                         if task_key:
                             for _attempt in range(12):
                                 time.sleep(2)
-                                poll = provider._get("mockup-generator/task", params={"task_key": task_key})
+                                poll = provider._get("mockup-generator/task", params={"task_key": task_key, "store_id": s_id})
                                 poll_res = poll.get("result", {}) if isinstance(poll, dict) else {}
                                 status = poll_res.get("status")
                                 if status == "completed":
