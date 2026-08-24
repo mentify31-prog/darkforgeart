@@ -5,6 +5,8 @@ Shop views: product listing, product detail, cart management.
 """
 import csv
 import xml.etree.ElementTree as ET
+from urllib.parse import urlparse
+
 from django.conf import settings
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
@@ -13,6 +15,83 @@ from django.views.decorators.http import require_POST
 
 from django.views.decorators.cache import cache_page
 from .models import Product, ProductVariant, ProductType
+
+
+GOOGLE_PRODUCT_CATEGORY_DEFAULT = "Home & Garden > Decor > Artwork > Posters, Prints, & Visual Artwork"
+
+GOOGLE_PRODUCT_CATEGORY_RULES = (
+    (
+        ("sweatshirt", "hoodie"),
+        "Apparel & Accessories > Clothing > Shirts & Tops",
+    ),
+    (
+        ("shirt", "t-shirt", "tee", "tank top", "crop top"),
+        "Apparel & Accessories > Clothing > Shirts & Tops",
+    ),
+    (
+        ("jacket", "coat"),
+        "Apparel & Accessories > Clothing > Outerwear > Coats & Jackets",
+    ),
+    (
+        ("backpack",),
+        "Luggage & Bags > Backpacks",
+    ),
+    (
+        ("fanny pack", "waist bag", "belt bag"),
+        "Luggage & Bags > Fanny Packs",
+    ),
+    (
+        ("crossbody", "messenger bag", "sling bag"),
+        "Luggage & Bags > Messenger Bags",
+    ),
+    (
+        ("bag", "tote"),
+        "Apparel & Accessories > Handbags, Wallets & Cases > Handbags",
+    ),
+    (
+        ("poster", "print", "art print", "canvas", "wall art"),
+        GOOGLE_PRODUCT_CATEGORY_DEFAULT,
+    ),
+)
+
+
+def _normalize_feed_image_url(image_url, base_url):
+    """Return an absolute HTTP(S) image URL, or an empty string if unusable."""
+    image_url = (image_url or "").strip()
+    if not image_url:
+        return ""
+    if image_url.startswith("/"):
+        image_url = f"{base_url}{image_url}"
+    parsed = urlparse(image_url)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        return ""
+    return image_url
+
+
+def _product_feed_image_url(product, base_url):
+    """Resolve the best catalog-safe image URL for a product."""
+    candidates = []
+    phys = getattr(product, "physical_detail", None)
+    if phys:
+        candidates.append(getattr(phys, "mockup_image_url", ""))
+        candidates.extend(getattr(phys, "mockup_images", []) or [])
+    candidates.append(product.preview_url)
+
+    for image_url in candidates:
+        normalized = _normalize_feed_image_url(image_url, base_url)
+        if normalized:
+            return normalized
+    return ""
+
+
+def _google_product_category(product):
+    text = f"{product.title or ''} {product.description or ''} {product.get_product_type_display()}".lower()
+    for keywords, category in GOOGLE_PRODUCT_CATEGORY_RULES:
+        if any(keyword in text for keyword in keywords):
+            return category
+    if product.product_type == ProductType.PHYSICAL:
+        return "Apparel & Accessories > Clothing > Shirts & Tops"
+    return GOOGLE_PRODUCT_CATEGORY_DEFAULT
 
 
 @cache_page(300)
@@ -213,13 +292,14 @@ def pinterest_catalog_feed(request, fmt="csv"):
     for prod in active_products:
         prod_link = f"{base_url}/shop/product/{prod.slug}/"
 
-        # Resolve image link
-        img_url = prod.preview_url or ""
-        if img_url and img_url.startswith("/"):
-            img_url = f"{base_url}{img_url}"
+        # Pinterest rejects rows with blank or non-fetchable image_link values.
+        img_url = _product_feed_image_url(prod, base_url)
+        if not img_url:
+            continue
 
         description = prod.description or f"High quality {prod.title} from DarkForge Art."
         clean_desc = description.replace("\n", " ").replace("\r", " ").strip()
+        google_product_category = _google_product_category(prod)
 
         phys = getattr(prod, "physical_detail", None)
         variants = list(phys.variants.filter(stock_available=True)) if phys else []
@@ -245,7 +325,7 @@ def pinterest_catalog_feed(request, fmt="csv"):
                     "availability": "in stock",
                     "condition": "new",
                     "brand": "DarkForge Art",
-                    "google_product_category": "Apparel & Accessories",
+                    "google_product_category": google_product_category,
                 })
         else:
             sku = prod.slug
@@ -260,7 +340,7 @@ def pinterest_catalog_feed(request, fmt="csv"):
                 "availability": "in stock",
                 "condition": "new",
                 "brand": "DarkForge Art",
-                "google_product_category": "Apparel & Accessories",
+                "google_product_category": google_product_category,
             })
 
     if fmt == "xml":
@@ -282,6 +362,7 @@ def pinterest_catalog_feed(request, fmt="csv"):
             ET.SubElement(item_elem, "g:availability").text = item["availability"]
             ET.SubElement(item_elem, "g:condition").text = item["condition"]
             ET.SubElement(item_elem, "g:brand").text = item["brand"]
+            ET.SubElement(item_elem, "g:google_product_category").text = item["google_product_category"]
 
         xml_bytes = ET.tostring(rss, encoding="utf-8", xml_declaration=True)
         return HttpResponse(xml_bytes, content_type="application/xml; charset=utf-8")
