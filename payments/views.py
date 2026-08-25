@@ -80,7 +80,7 @@ def _build_order_from_cart(request, shipping_data: dict) -> Order | None:
 
     from orders.shipping import calculate_cart_shipping
     country_code = shipping_data.get("country_code", "US")
-    shipping_usd, shipping_kes, _ = calculate_cart_shipping(line_items, country_code)
+    shipping_usd, shipping_kes, _ = calculate_cart_shipping(line_items, country_code, shipping_data)
     final_order_total = float(total) + shipping_kes
 
     order = Order.objects.create(
@@ -92,6 +92,8 @@ def _build_order_from_cart(request, shipping_data: dict) -> Order | None:
         shipping_name=shipping_data.get("name", ""),
         shipping_email=shipping_data.get("email", ""),
         shipping_address={
+            "name": shipping_data.get("name", ""),
+            "email": shipping_data.get("email", ""),
             "address1": shipping_data.get("address1", ""),
             "city": shipping_data.get("city", ""),
             "country_code": shipping_data.get("country_code", "KE"),

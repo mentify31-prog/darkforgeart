@@ -143,7 +143,31 @@ class PrintifyProvider(FulfillmentProviderBase):
         )
         return resp.status_code < 300
 
+    def calculate_order_shipping(self, line_items: list[dict], address_to: dict) -> dict[str, Any]:
+        """
+        Calculate Printify shipping for shop products using the same IDs used for order creation.
+        Returns the raw Printify response, e.g. {"standard": 1000, "economy": 399}.
+        Amounts are returned by Printify in cents.
+        """
+        payload = {
+            "line_items": line_items,
+            "address_to": address_to,
+        }
+        status_code, body = self._post(
+            f"shops/{self.shop_id}/orders/shipping.json",
+            payload,
+        )
+        if status_code not in (200, 201):
+            logger.warning("Printify shipping calculation failed: %s %s", status_code, body)
+            return {}
+        return body
+
     def get_shipping_rates(self, items: list[dict], address: dict) -> list[dict[str, Any]]:
-        # Printify doesn't have a generic rates endpoint; return empty list
-        # Rates are fetched when creating the product in the Printify dashboard
-        return []
+        body = self.calculate_order_shipping(items, address)
+        rates = []
+        for method, amount in body.items():
+            try:
+                rates.append({"method": method, "amount_usd": float(amount) / 100})
+            except (TypeError, ValueError):
+                continue
+        return rates

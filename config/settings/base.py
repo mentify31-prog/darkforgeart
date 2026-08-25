@@ -240,6 +240,7 @@ PRINTFUL_STORE_ID = os.environ.get("PRINTFUL_STORE_ID", "")
 
 PRINTIFY_API_KEY = os.environ.get("PRINTIFY_API_KEY", "")
 PRINTIFY_SHOP_ID = os.environ.get("PRINTIFY_SHOP_ID", "")
+PRINTIFY_INCLUDED_SHIPPING_USD = float(os.environ.get("PRINTIFY_INCLUDED_SHIPPING_USD", "9.99"))
 
 # ─── Currency Conversion ──────────────────────────────────────────────────────
 # KES to USD exchange rate for frontend display (1 USD = 130 KES default)
