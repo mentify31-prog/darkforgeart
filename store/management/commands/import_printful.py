@@ -20,6 +20,9 @@ from fulfillment.printful import PrintfulProvider
 
 logger = logging.getLogger("darkforge")
 
+VARIANT_SIZE_MAX_LENGTH = 50
+VARIANT_COLOR_MAX_LENGTH = 50
+
 
 def _numeric_sort_key(value):
     match = re.search(r"\d+", str(value or ""))
@@ -278,19 +281,21 @@ class Command(BaseCommand):
 
                 variant_price_usd = float(sv.get("retail_price", first_retail)) + SHIPPING_BUFFER_USD
                 variant_price_kes = round(variant_price_usd * rate, 2)
+                size = size[:VARIANT_SIZE_MAX_LENGTH]
+                color = color[:VARIANT_COLOR_MAX_LENGTH]
 
                 var_obj, _ = self._get_or_create_variant(
                     physical_product=phys,
                     printful_variant_id=pv_id,
                     defaults={
-                        "size": size[:20],
-                        "color": color[:30],
+                        "size": size,
+                        "color": color,
                         "price_override": variant_price_kes,
                         "stock_available": True,
                     },
                 )
-                var_obj.size = size[:20]
-                var_obj.color = color[:30]
+                var_obj.size = size
+                var_obj.color = color
                 var_obj.price_override = variant_price_kes
                 var_obj.stock_available = True
                 var_obj.save()

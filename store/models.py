@@ -240,7 +240,11 @@ class ProductVariant(models.Model):
         on_delete=models.CASCADE,
         related_name="variants",
     )
-    size = models.CharField(max_length=10, blank=True, help_text=_('e.g. "S", "M", "XL"'))
+    size = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text=_('e.g. "S", "M", "XL", "30 x 40", or "One size"'),
+    )
     color = models.CharField(max_length=50, blank=True)
     printful_variant_id = models.CharField(max_length=100, blank=True)
     printify_variant_id = models.CharField(max_length=100, blank=True)

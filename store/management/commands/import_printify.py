@@ -16,6 +16,10 @@ from store.models import Product, ProductType, PhysicalProduct, ProductVariant, 
 from fulfillment.printify import PrintifyProvider
 
 
+VARIANT_SIZE_MAX_LENGTH = 50
+VARIANT_COLOR_MAX_LENGTH = 50
+
+
 def _numeric_sort_key(value):
     match = re.search(r"\d+", str(value or ""))
     return int(match.group()) if match else 0
@@ -138,6 +142,8 @@ class Command(BaseCommand):
                 parts = v_title.split("/")
                 color = parts[0].strip() if len(parts) > 0 else ""
                 size = parts[1].strip() if len(parts) > 1 else v_title
+                size = size[:VARIANT_SIZE_MAX_LENGTH]
+                color = color[:VARIANT_COLOR_MAX_LENGTH]
 
                 variant, _ = self._get_or_create_variant(
                     physical_product=phys,
