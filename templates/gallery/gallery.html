@@ -81,6 +81,11 @@
     {% endif %}
 
     {% if artworks %}
+    <div style="margin-bottom:1.25rem;">
+      <p class="text-upper text-accent" style="font-size:0.75rem;margin-bottom:0.35rem;">Original Artwork</p>
+      <h2 style="font-size:1.45rem;margin:0;">Gallery Works</h2>
+    </div>
+
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:2rem;">
       {% for artwork in artworks %}
       <article style="background:var(--color-surface);border:1px solid var(--color-border);overflow:hidden;transition:border-color 0.3s ease,transform 0.3s ease;" class="gallery-card">
