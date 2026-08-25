@@ -7,7 +7,7 @@
 <div class="container" style="max-width:880px;padding:3rem 1rem;line-height:1.75;">
   <div style="margin-bottom:2rem;text-align:center;">
     <h1 style="font-family:'Cinzel',serif;font-size:2.25rem;margin-bottom:0.5rem;color:var(--color-text-title);">Terms of Service &amp; Privacy Policy</h1>
-    <p style="color:var(--color-text-muted);font-size:0.9rem;">Effective Date: August 24, 2026</p>
+    <p style="color:var(--color-text-muted);font-size:0.9rem;">Effective Date: August 25, 2026</p>
   </div>
 
   <div class="card" style="background:var(--color-card-bg);border:1px solid var(--color-border);padding:2rem;border-radius:6px;margin-bottom:1.75rem;">
@@ -17,21 +17,39 @@
 
   <div class="card" style="background:var(--color-card-bg);border:1px solid var(--color-border);padding:2rem;border-radius:6px;margin-bottom:1.75rem;">
     <h2 style="font-size:1.25rem;color:var(--color-text-title);margin-bottom:1rem;font-family:'Cinzel',serif;">2. Shipping Guidelines</h2>
-    <p>We provide <strong>FREE Worldwide Shipping</strong> to the United States, United Kingdom, Canada, and Europe. Orders are printed and dispatched within 2–5 business days, with carrier tracking provided upon shipment.</p>
+    <p>Shipping may be included in the listed product price for selected destinations, including the United States, United Kingdom, Canada, and parts of Europe. For other destinations, or where carrier costs exceed the amount already included in the product price, an additional delivery fee may be added at checkout before payment.</p>
+    <p style="margin-top:0.85rem;">The order total shown before payment is the amount you authorize us to charge. Delivery costs depend on the product type, quantity, shipping destination, and available carrier options. Estimated delivery times may vary by destination, customs processing, local holidays, and carrier delays.</p>
+    <p style="margin-top:0.85rem;">International customers are responsible for any customs duties, import taxes, brokerage fees, or local charges required by their country. These charges are not controlled by DarkForge Art and may not appear in the checkout total.</p>
   </div>
 
   <div class="card" style="background:var(--color-card-bg);border:1px solid var(--color-border);padding:2rem;border-radius:6px;margin-bottom:1.75rem;">
-    <h2 style="font-size:1.25rem;color:var(--color-text-title);margin-bottom:1rem;font-family:'Cinzel',serif;">3. Privacy &amp; Data Protection</h2>
-    <p>We take your personal data security seriously. Customer names, shipping addresses, and payment details collected during checkout are encrypted and processed securely via Paystack and our automated fulfillment networks solely for order delivery and customer support. We never sell or share your personal data with third-party advertisers.</p>
+    <h2 style="font-size:1.25rem;color:var(--color-text-title);margin-bottom:1rem;font-family:'Cinzel',serif;">3. Returns, Refunds &amp; Replacements</h2>
+    <p>Physical products are made to order. Because of this, returns are generally accepted only for damaged, defective, incorrect, or missing items. Customers should contact support with the order number and clear photos of the issue as soon as possible after delivery.</p>
+    <p style="margin-top:0.85rem;">Digital downloads and license purchases are generally final once access has been delivered, except where required by law or where a technical issue prevents access to the purchased file.</p>
+  </div>
+
+  <div class="card" style="background:var(--color-card-bg);border:1px solid var(--color-border);padding:2rem;border-radius:6px;margin-bottom:1.75rem;">
+    <h2 style="font-size:1.25rem;color:var(--color-text-title);margin-bottom:1rem;font-family:'Cinzel',serif;">4. Privacy &amp; Data Protection</h2>
+    <p>We take your personal data security seriously. Customer names, shipping addresses, and payment details collected during checkout are processed securely for payment handling, order delivery, fraud prevention, account access, and customer support. We never sell or share your personal data with third-party advertisers.</p>
   </div>
 
   <div class="card" style="background:var(--color-card-bg);border:1px solid var(--color-border);padding:2rem;border-radius:6px;">
-    <h2 style="font-size:1.25rem;color:var(--color-text-title);margin-bottom:1rem;font-family:'Cinzel',serif;">4. Contact &amp; Legal Inquiries</h2>
+    <h2 style="font-size:1.25rem;color:var(--color-text-title);margin-bottom:1rem;font-family:'Cinzel',serif;">5. Contact &amp; Legal Inquiries</h2>
     <p>For questions regarding our store policies or privacy practices:</p>
     <ul style="margin-left:1.5rem;margin-top:0.75rem;">
       <li><strong>Email:</strong> <a href="mailto:privacy@darkforgeart.store" style="color:var(--color-accent);text-decoration:underline;">privacy@darkforgeart.store</a> or <a href="mailto:support@darkforgeart.store" style="color:var(--color-accent);text-decoration:underline;">support@darkforgeart.store</a></li>
       <li><strong>Website:</strong> <a href="https://darkforgeart.store" style="color:var(--color-accent);text-decoration:underline;">https://darkforgeart.store</a></li>
     </ul>
   </div>
+
+  {% if user.is_authenticated and not user.is_staff and not user.terms_accepted_at %}
+  <div style="margin-top:1.75rem;display:flex;justify-content:center;">
+    <form method="post" action="{% url 'accounts:accept_terms' %}" style="margin:0;">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ user.get_dashboard_url }}">
+      <button type="submit" class="btn btn-primary">I Accept These Terms</button>
+    </form>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

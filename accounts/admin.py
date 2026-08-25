@@ -13,16 +13,30 @@ from .models import User, Profile
 class UserAdmin(BaseUserAdmin):
     list_display = [
         "email", "first_name", "last_name", "role",
-        "is_email_verified", "is_active", "created_at",
+        "is_email_verified", "terms_accepted_at", "is_active", "created_at",
     ]
-    list_filter = ["role", "is_email_verified", "is_active", "is_staff"]
+    list_filter = ["role", "is_email_verified", "terms_accepted_at", "is_active", "is_staff"]
     search_fields = ["email", "first_name", "last_name", "username"]
     ordering = ["-created_at"]
-    readonly_fields = ["created_at", "updated_at", "email_verification_token"]
+    readonly_fields = [
+        "created_at",
+        "updated_at",
+        "email_verification_token",
+        "terms_accepted_at",
+        "terms_accepted_version",
+    ]
 
     fieldsets = BaseUserAdmin.fieldsets + (
         ("DarkForge Art", {
-            "fields": ("role", "phone", "avatar_url", "is_email_verified", "email_verification_token"),
+            "fields": (
+                "role",
+                "phone",
+                "avatar_url",
+                "is_email_verified",
+                "email_verification_token",
+                "terms_accepted_at",
+                "terms_accepted_version",
+            ),
         }),
     )
     add_fieldsets = BaseUserAdmin.add_fieldsets + (

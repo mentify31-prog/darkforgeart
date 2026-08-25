@@ -58,6 +58,8 @@ class User(AbstractUser):
         editable=False,
         help_text=_("Token sent in verification email"),
     )
+    terms_accepted_at = models.DateTimeField(null=True, blank=True)
+    terms_accepted_version = models.CharField(max_length=20, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -20,6 +20,7 @@ urlpatterns = [
     # Login / Logout
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
+    path("accept-terms/", views.accept_terms, name="accept_terms"),
 
     # Google OAuth
     path("google/", views.google_login, name="google_login"),

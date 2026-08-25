@@ -23,6 +23,8 @@ from django.core.mail import send_mail
 from django.db.models import Sum, Count
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
 
@@ -36,6 +38,8 @@ from .forms import (
 from .models import User, Profile
 from .decorators import admin_required
 from services.email_service import send_welcome_email, send_verification_email
+
+CURRENT_TERMS_VERSION = "2026-08-25"
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -168,6 +172,19 @@ def logout_view(request):
     logout(request)
     messages.info(request, "You've been signed out. See you soon!")
     return redirect("gallery:home")
+
+
+@require_POST
+@login_required
+def accept_terms(request):
+    request.user.terms_accepted_at = timezone.now()
+    request.user.terms_accepted_version = CURRENT_TERMS_VERSION
+    request.user.save(update_fields=["terms_accepted_at", "terms_accepted_version"])
+    messages.success(request, "Terms accepted. Thank you.")
+    next_url = request.POST.get("next") or request.user.get_dashboard_url()
+    if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        next_url = request.user.get_dashboard_url()
+    return redirect(next_url)
 
 
 # ─── Password Reset (Django built-in views, custom templates) ─────────────────
