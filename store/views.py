@@ -34,15 +34,15 @@ GOOGLE_PRODUCT_CATEGORY_RULES = (
     ),
     (
         ("backpack",),
-        "Luggage & Bags > Backpacks",
+        "Apparel & Accessories > Handbags, Wallets & Cases > Handbags",
     ),
     (
         ("fanny pack", "waist bag", "belt bag"),
-        "Luggage & Bags > Fanny Packs",
+        "Apparel & Accessories > Handbags, Wallets & Cases > Handbags",
     ),
     (
         ("crossbody", "messenger bag", "sling bag"),
-        "Luggage & Bags > Messenger Bags",
+        "Apparel & Accessories > Handbags, Wallets & Cases > Handbags",
     ),
     (
         ("bag", "tote"),
