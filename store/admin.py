@@ -1,12 +1,16 @@
 """
 store/admin.py
 """
+import logging
+import threading
+
 from django import forms
 from django.contrib import admin
 from django.urls import path
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.core.management import call_command
+from django.db import close_old_connections
 from django.utils.safestring import mark_safe
 from .models import (
     Product,
@@ -18,6 +22,20 @@ from .models import (
     ProductType,
 )
 from .services import upload_product_mockup_files
+
+logger = logging.getLogger("darkforge")
+
+
+def _run_import_commands(command_names):
+    close_old_connections()
+    try:
+        for command_name in command_names:
+            call_command(command_name)
+            close_old_connections()
+    except Exception:
+        logger.exception("Admin fulfillment import failed for commands: %s", ", ".join(command_names))
+    finally:
+        close_old_connections()
 
 
 class DigitalProductInline(admin.StackedInline):
@@ -184,20 +202,26 @@ class ProductAdmin(admin.ModelAdmin):
         return custom_urls + urls
 
     def admin_import_printify(self, request):
-        try:
-            call_command("import_printify")
-            self.message_user(request, "Printify products and variants imported successfully!", messages.SUCCESS)
-        except Exception as exc:
-            self.message_user(request, f"Printify sync error: {exc}", messages.ERROR)
+        self._start_import_commands(request, ("import_printify",), "Printify")
         return redirect("admin:store_product_changelist")
 
     def admin_import_printful(self, request):
-        try:
-            call_command("import_printful")
-            self.message_user(request, "Printful products and variants imported successfully!", messages.SUCCESS)
-        except Exception as exc:
-            self.message_user(request, f"Printful sync error: {exc}", messages.ERROR)
+        self._start_import_commands(request, ("import_printful",), "Printful")
         return redirect("admin:store_product_changelist")
+
+    def _start_import_commands(self, request, command_names, label):
+        thread = threading.Thread(
+            target=_run_import_commands,
+            args=(command_names,),
+            name=f"{label.lower()}-fulfillment-import",
+            daemon=True,
+        )
+        thread.start()
+        self.message_user(
+            request,
+            f"{label} sync started in the background. Check Render logs for completion or errors.",
+            messages.INFO,
+        )
 
     @admin.action(description="Sync / Import all products from Printify")
     def sync_from_printify(self, request, queryset=None):
@@ -209,8 +233,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     @admin.action(description="Sync / Import from BOTH Printify & Printful")
     def sync_all_fulfillment(self, request, queryset=None):
-        self.admin_import_printify(request)
-        self.admin_import_printful(request)
+        self._start_import_commands(request, ("import_printify", "import_printful"), "Printify and Printful")
         return redirect("admin:store_product_changelist")
 
     def get_inlines(self, request, obj=None):

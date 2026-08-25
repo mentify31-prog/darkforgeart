@@ -8,6 +8,7 @@ Usage:
 import re
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.db.models import Count
 
 from gallery.models import Artwork
 from store.models import Product, ProductType, PhysicalProduct, ProductVariant, FulfillmentProvider
@@ -16,6 +17,38 @@ from fulfillment.printify import PrintifyProvider
 
 class Command(BaseCommand):
     help = "Automatically sync and import all products and variants from Printify API."
+
+    def _get_or_create_variant(self, physical_product, printify_variant_id, defaults):
+        """
+        Reuse one variant even if older imports created duplicate Printify variant rows.
+        Extra duplicates are disabled instead of deleted to avoid breaking past orders.
+        """
+        qs = (
+            ProductVariant.objects.filter(
+                physical_product=physical_product,
+                printify_variant_id=printify_variant_id,
+            )
+            .annotate(order_count=Count("order_items"))
+            .order_by("-order_count", "pk")
+        )
+        variant = qs.first()
+        if variant:
+            duplicate_ids = list(qs.values_list("pk", flat=True)[1:])
+            if duplicate_ids:
+                ProductVariant.objects.filter(pk__in=duplicate_ids).update(stock_available=False)
+                self.stderr.write(
+                    self.style.WARNING(
+                        f"Disabled {len(duplicate_ids)} duplicate Printify variant row(s) "
+                        f"for variant ID {printify_variant_id}."
+                    )
+                )
+            return variant, False
+
+        return ProductVariant.objects.create(
+            physical_product=physical_product,
+            printify_variant_id=printify_variant_id,
+            **defaults,
+        ), True
 
     def handle(self, *args, **options):
         p = PrintifyProvider()
@@ -99,7 +132,7 @@ class Command(BaseCommand):
                 color = parts[0].strip() if len(parts) > 0 else ""
                 size = parts[1].strip() if len(parts) > 1 else v_title
 
-                variant, _ = ProductVariant.objects.get_or_create(
+                variant, _ = self._get_or_create_variant(
                     physical_product=phys,
                     printify_variant_id=v_id,
                     defaults={
@@ -107,7 +140,7 @@ class Command(BaseCommand):
                         "color": color,
                         "price_override": v_price_kes,
                         "stock_available": True,
-                    }
+                    },
                 )
                 variant.size = size
                 variant.color = color
