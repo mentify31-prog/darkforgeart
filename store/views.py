@@ -109,7 +109,7 @@ def shop(request):
     if product_type:
         products = products.filter(product_type=product_type)
 
-    products = products.order_by("-created_at")
+    products = products.order_by("-updated_at", "-created_at")
 
     context = {
         "products": products,

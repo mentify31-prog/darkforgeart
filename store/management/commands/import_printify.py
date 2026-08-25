@@ -8,11 +8,17 @@ Usage:
 import re
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.core.cache import cache
 from django.db.models import Count
 
 from gallery.models import Artwork
 from store.models import Product, ProductType, PhysicalProduct, ProductVariant, FulfillmentProvider
 from fulfillment.printify import PrintifyProvider
+
+
+def _numeric_sort_key(value):
+    match = re.search(r"\d+", str(value or ""))
+    return int(match.group()) if match else 0
 
 
 class Command(BaseCommand):
@@ -58,6 +64,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(f"Connected to Printify Shop ID: {p.shop_id}"))
         self.stdout.write(f"Found {len(items)} products in Printify shop.")
+        items = sorted(items, key=lambda item: _numeric_sort_key(item.get("id")))
 
         default_artwork = Artwork.objects.first()
 
@@ -151,4 +158,5 @@ class Command(BaseCommand):
 
             self.stdout.write(self.style.SUCCESS(f"Synced '{title}' with {added_vars} active variants."))
 
+        cache.clear()
         self.stdout.write(self.style.SUCCESS("Printify sync complete!"))

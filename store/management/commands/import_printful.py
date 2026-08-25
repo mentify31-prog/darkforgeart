@@ -9,14 +9,21 @@ Usage:
 from __future__ import annotations
 
 import logging
+import re
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.core.cache import cache
 from django.db.models import Count
 from store.models import Product, PhysicalProduct, ProductVariant, ProductType, FulfillmentProvider
 from gallery.models import Artwork
 from fulfillment.printful import PrintfulProvider
 
 logger = logging.getLogger("darkforge")
+
+
+def _numeric_sort_key(value):
+    match = re.search(r"\d+", str(value or ""))
+    return int(match.group()) if match else 0
 
 
 class Command(BaseCommand):
@@ -86,6 +93,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("No sync products found across your Printful store(s)."))
             return
 
+        products_data_with_store.sort(key=lambda item: _numeric_sort_key(item[1].get("id")))
         self.stdout.write(self.style.SUCCESS(f"Found {len(products_data_with_store)} products across Printful store(s)."))
 
         default_artwork = Artwork.objects.first()
@@ -292,4 +300,5 @@ class Command(BaseCommand):
                 f"Synced Printful product '{p_name}' with {added_vars} active variants."
             ))
 
+        cache.clear()
         self.stdout.write(self.style.SUCCESS("Printful sync complete!"))
