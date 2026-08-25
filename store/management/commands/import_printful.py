@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.db.models import Count
 from store.models import Product, PhysicalProduct, ProductVariant, ProductType, FulfillmentProvider
 from gallery.models import Artwork
 from fulfillment.printful import PrintfulProvider
@@ -20,6 +21,38 @@ logger = logging.getLogger("darkforge")
 
 class Command(BaseCommand):
     help = "Import physical products from Printful API into Django DB"
+
+    def _get_or_create_variant(self, physical_product, printful_variant_id, defaults):
+        """
+        Reuse one variant even if older imports created duplicate Printful variant rows.
+        Extra duplicates are disabled instead of deleted to avoid breaking past orders.
+        """
+        qs = (
+            ProductVariant.objects.filter(
+                physical_product=physical_product,
+                printful_variant_id=printful_variant_id,
+            )
+            .annotate(order_count=Count("order_items"))
+            .order_by("-order_count", "pk")
+        )
+        variant = qs.first()
+        if variant:
+            duplicate_ids = list(qs.values_list("pk", flat=True)[1:])
+            if duplicate_ids:
+                ProductVariant.objects.filter(pk__in=duplicate_ids).update(stock_available=False)
+                self.stderr.write(
+                    self.style.WARNING(
+                        f"Disabled {len(duplicate_ids)} duplicate Printful variant row(s) "
+                        f"for variant ID {printful_variant_id}."
+                    )
+                )
+            return variant, False
+
+        return ProductVariant.objects.create(
+            physical_product=physical_product,
+            printful_variant_id=printful_variant_id,
+            **defaults,
+        ), True
 
     def handle(self, *args, **options):
         provider = PrintfulProvider()
@@ -238,7 +271,7 @@ class Command(BaseCommand):
                 variant_price_usd = float(sv.get("retail_price", first_retail)) + SHIPPING_BUFFER_USD
                 variant_price_kes = round(variant_price_usd * rate, 2)
 
-                var_obj, _ = ProductVariant.objects.get_or_create(
+                var_obj, _ = self._get_or_create_variant(
                     physical_product=phys,
                     printful_variant_id=pv_id,
                     defaults={
@@ -246,7 +279,7 @@ class Command(BaseCommand):
                         "color": color[:30],
                         "price_override": variant_price_kes,
                         "stock_available": True,
-                    }
+                    },
                 )
                 var_obj.size = size[:20]
                 var_obj.color = color[:30]
