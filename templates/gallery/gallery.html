@@ -43,6 +43,43 @@
     </div>
 
     {# ── Clean Artwork Grid (No Grey Blank Space) ── #}
+    {% if featured_products %}
+    <div style="margin-bottom:3.5rem;">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem;">
+        <div>
+          <p class="text-upper text-accent" style="font-size:0.75rem;margin-bottom:0.35rem;">Featured Physical Pieces</p>
+          <h2 style="font-size:1.45rem;margin:0;">Selected Merch</h2>
+        </div>
+        <a href="{% url 'store:shop' %}?type=physical" class="btn btn-ghost btn-sm">View Shop</a>
+      </div>
+
+      <div class="featured-product-strip" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;">
+        {% for product in featured_products %}
+        <article style="border:1px solid var(--color-border);background:var(--color-surface);overflow:hidden;" class="gallery-card">
+          <a href="{% url 'store:product_detail' product.slug %}" style="display:block;color:inherit;text-decoration:none;">
+            <div style="aspect-ratio:1;overflow:hidden;background:var(--color-bg);">
+              {% if product.preview_url %}
+              <img
+                src="{{ product.preview_url }}"
+                alt="{{ product.title }}"
+                loading="lazy"
+                style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;"
+                class="gallery-img"
+              >
+              {% endif %}
+            </div>
+            <div style="padding:1rem;">
+              <p class="text-upper text-muted" style="font-size:0.68rem;margin-bottom:0.25rem;">Physical Product</p>
+              <h3 style="font-size:0.98rem;line-height:1.3;margin-bottom:0.6rem;">{{ product.title }}</h3>
+              <span style="font-family:var(--font-display);font-size:1.05rem;color:var(--color-white);">${{ product.price_usd|floatformat:2 }}</span>
+            </div>
+          </a>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
     {% if artworks %}
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:2rem;">
       {% for artwork in artworks %}
@@ -108,6 +145,18 @@
 }
 .gallery-card:hover .gallery-overlay {
   opacity: 1 !important;
+}
+@media (max-width: 640px) {
+  .featured-product-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.875rem !important;
+  }
+  .featured-product-strip article div:last-child {
+    padding: 0.85rem !important;
+  }
+  .featured-product-strip h3 {
+    font-size: 0.9rem !important;
+  }
 }
 </style>
 {% endblock %}

@@ -59,6 +59,15 @@ class Product(models.Model):
     )
     currency = models.CharField(max_length=3, default="KES")
     is_active = models.BooleanField(default=True, db_index=True)
+    show_in_gallery = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text=_("Show this physical product in the Gallery page featured products section."),
+    )
+    gallery_sort_order = models.PositiveSmallIntegerField(
+        default=0,
+        help_text=_("Lower numbers appear first in the Gallery page featured products section."),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

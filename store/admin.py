@@ -10,6 +10,7 @@ from django.urls import path
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.core.management import call_command
+from django.core.cache import cache
 from django.db import close_old_connections
 from django.utils.safestring import mark_safe
 from .models import (
@@ -178,12 +179,54 @@ class PhysicalProductAdmin(admin.ModelAdmin):
 class ProductAdmin(admin.ModelAdmin):
     show_full_result_count = False
     raw_id_fields = ["artwork"]
-    list_display = ["title", "product_type", "price", "currency", "is_active", "created_at"]
-    list_filter = ["product_type", "is_active", "currency"]
+    list_display = [
+        "title",
+        "product_type",
+        "price",
+        "currency",
+        "is_active",
+        "show_in_gallery",
+        "gallery_sort_order",
+        "created_at",
+    ]
+    list_editable = ["show_in_gallery", "gallery_sort_order"]
+    list_filter = ["product_type", "is_active", "show_in_gallery", "currency"]
     search_fields = ["title", "description", "artwork__title"]
     prepopulated_fields = {"slug": ("title",)}
     readonly_fields = ["created_at", "updated_at"]
-    actions = ["sync_from_printify", "sync_from_printful", "sync_all_fulfillment"]
+    actions = [
+        "show_selected_in_gallery",
+        "hide_selected_from_gallery",
+        "sync_from_printify",
+        "sync_from_printful",
+        "sync_all_fulfillment",
+    ]
+
+    fieldsets = (
+        (None, {
+            "fields": (
+                "artwork",
+                "product_type",
+                "title",
+                "slug",
+                "description",
+                "price",
+                "currency",
+                "is_active",
+            )
+        }),
+        ("Gallery Feature", {
+            "fields": ("show_in_gallery", "gallery_sort_order"),
+            "description": "Use this to show selected active physical products on the Gallery page.",
+        }),
+        ("Timestamps", {
+            "fields": ("created_at", "updated_at"),
+        }),
+    )
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        cache.clear()
 
     def get_urls(self):
         urls = super().get_urls()
@@ -235,6 +278,18 @@ class ProductAdmin(admin.ModelAdmin):
     def sync_all_fulfillment(self, request, queryset=None):
         self._start_import_commands(request, ("import_printify", "import_printful"), "Printify and Printful")
         return redirect("admin:store_product_changelist")
+
+    @admin.action(description="Show selected physical products in Gallery")
+    def show_selected_in_gallery(self, request, queryset):
+        updated = queryset.filter(product_type=ProductType.PHYSICAL).update(show_in_gallery=True)
+        cache.clear()
+        self.message_user(request, f"{updated} physical product(s) marked for the Gallery page.", messages.SUCCESS)
+
+    @admin.action(description="Hide selected products from Gallery")
+    def hide_selected_from_gallery(self, request, queryset):
+        updated = queryset.update(show_in_gallery=False)
+        cache.clear()
+        self.message_user(request, f"{updated} product(s) hidden from the Gallery page.", messages.SUCCESS)
 
     def get_inlines(self, request, obj=None):
         if obj is None:

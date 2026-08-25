@@ -10,7 +10,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 
 from .models import Artwork, ArtworkTag
-from store.models import Product
+from store.models import Product, ProductType
 
 
 @cache_page(300)
@@ -79,11 +79,22 @@ def gallery(request):
     for artwork in artworks:
         artwork.preview_public_url = artwork.get_preview_public_url()
 
+    featured_products = (
+        Product.objects.filter(
+            is_active=True,
+            show_in_gallery=True,
+            product_type=ProductType.PHYSICAL,
+        )
+        .select_related("physical_detail")
+        .order_by("gallery_sort_order", "-updated_at", "-created_at")[:8]
+    )
+
     tags = ArtworkTag.objects.all()
     styles = Artwork.Style.choices
 
     context = {
         "artworks": artworks,
+        "featured_products": featured_products,
         "tags": tags,
         "styles": styles,
         "selected_tag": selected_tag,
