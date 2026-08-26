@@ -494,9 +494,10 @@ def contact(request):
             subject = form.cleaned_data["subject"]
             message_text = form.cleaned_data["message"]
 
-            # Send email notification to Admin
+            # Send email notification to Admin (checks CONTACT_RECIPIENT_EMAIL first, falls back to ADMIN_EMAILS)
+            recipient_setting = getattr(settings, "CONTACT_RECIPIENT_EMAIL", "").strip()
             admin_emails = getattr(settings, "ADMIN_EMAILS", [])
-            support_recipient = admin_emails[0] if admin_emails else "jonesjorney@gmail.com"
+            support_recipient = recipient_setting or (admin_emails[0] if admin_emails else "techbidmarketplace@gmail.com")
 
             try:
                 from services.email_service import send_email_notification

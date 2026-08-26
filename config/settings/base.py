@@ -209,9 +209,10 @@ GITHUB_UPLOAD_DIR = os.environ.get("GITHUB_UPLOAD_DIR", "artwork")
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 DEFAULT_FROM_EMAIL = (
     os.environ.get("FROM_EMAIL", "").strip()
-    or os.environ.get("DEFAULT_FROM_EMAIL", "noreply@darkforgeart.com").strip()
+    or os.environ.get("DEFAULT_FROM_EMAIL", "DarkForge Art <noreply@darkforgeart.store>").strip()
 )
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+CONTACT_RECIPIENT_EMAIL = os.environ.get("CONTACT_RECIPIENT_EMAIL", "").strip()
 
 if RESEND_API_KEY:
     EMAIL_BACKEND = "services.resend_backend.ResendEmailBackend"
