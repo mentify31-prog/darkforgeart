@@ -13,4 +13,5 @@ def site_context(request):
         "PLATFORM_NAME": getattr(settings, "PLATFORM_NAME", "DarkForge Art"),
         "BASE_URL": getattr(settings, "BASE_URL", ""),
         "PAYSTACK_PUBLIC_KEY": getattr(settings, "PAYSTACK_PUBLIC_KEY", ""),
+        "PINTEREST_TAG_ID": getattr(settings, "PINTEREST_TAG_ID", ""),
     }

@@ -11,6 +11,14 @@ from django.contrib import admin, messages
 from django.utils.html import format_html
 
 from .models import Artwork, ArtworkImage, ArtworkTag
+from store.models import Product
+
+
+class ProductInline(admin.TabularInline):
+    model = Product
+    extra = 0
+    fields = ["title", "product_type", "price", "currency", "is_active"]
+    show_change_link = True
 
 
 class ArtworkImageInline(admin.TabularInline):
@@ -123,7 +131,7 @@ class ArtworkAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
     filter_horizontal = ["tags"]
     readonly_fields = ["created_at", "updated_at", "final_url_warning"]
-    inlines = [ArtworkImageInline]
+    inlines = [ArtworkImageInline, ProductInline]
 
     fieldsets = (
         ("Artwork Info", {

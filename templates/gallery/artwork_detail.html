@@ -4,132 +4,125 @@
 {% block content %}
 
 {# ── Full-bleed Artwork Hero ── #}
-<section style="position:relative;min-height:70vh;display:flex;align-items:flex-end;overflow:hidden;" class="full-bleed">
+<section style="position:relative;min-height:55vh;display:flex;align-items:flex-end;overflow:hidden;" class="full-bleed">
   {% if preview_url %}
-  <div style="position:absolute;inset:0;background-image:url('{{ preview_url }}');background-size:cover;background-position:center;filter:brightness(0.3);"></div>
+  <div style="position:absolute;inset:0;background-image:url('{{ preview_url }}');background-size:cover;background-position:center;filter:brightness(0.35);"></div>
   {% endif %}
-  <div style="position:absolute;inset:0;background:linear-gradient(to top,var(--color-bg) 0%,transparent 60%);"></div>
-  <div class="container" style="position:relative;z-index:1;padding-bottom:3rem;">
-    <p class="text-upper text-accent" style="margin-bottom:0.75rem;">{{ artwork.get_style_display }}</p>
-    <h1>{{ artwork.title }}</h1>
+  <div style="position:absolute;inset:0;background:linear-gradient(to top,var(--color-bg) 0%,transparent 70%);"></div>
+  <div class="container" style="position:relative;z-index:1;padding-bottom:2.5rem;">
+    <p class="text-upper text-accent" style="margin-bottom:0.5rem;letter-spacing:0.1em;font-size:0.85rem;">{{ artwork.get_style_display }}</p>
+    <h1 style="font-family:'Cinzel',serif;font-size:2.5rem;margin-bottom:0.75rem;color:var(--color-text-title);">{{ artwork.title }}</h1>
     {% for tag in artwork.tags.all %}
-    <a href="{% url 'gallery:gallery' %}?tag={{ tag.slug }}" style="display:inline-block;margin-top:0.75rem;margin-right:0.5rem;font-size:0.8rem;color:var(--color-text-muted);">#{{ tag.name }}</a>
+    <a href="{% url 'gallery:gallery' %}?tag={{ tag.slug }}" style="display:inline-block;margin-right:0.5rem;font-size:0.8rem;color:var(--color-text-muted);">#{{ tag.name }}</a>
     {% endfor %}
   </div>
 </section>
 
-{# ── Main Content ── #}
-<div class="container" style="display:grid;grid-template-columns:1fr 380px;gap:4rem;align-items:start;padding-top:3rem;">
+{# ── Main Artwork Presentation & Products Grid ── #}
+<div class="container" style="padding-top:3rem;padding-bottom:5rem;">
 
-  {# Left: Story + Process #}
-  <div>
-    {% if artwork.story %}
-    <div style="margin-bottom:3rem;">
-      <p class="text-upper text-muted" style="margin-bottom:1rem;">The Story</p>
-      <div style="font-size:1.05rem;line-height:1.8;color:var(--color-text);">
-        {{ artwork.story|linebreaks }}
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start;margin-bottom:4rem;">
+    {# Artwork High Resolution Preview #}
+    <div>
+      {% if preview_url %}
+      <div style="border:1px solid var(--color-border);background:var(--color-card-bg);padding:0.75rem;border-radius:4px;">
+        <img src="{{ preview_url }}" alt="{{ artwork.title }} - watermarked preview" style="width:100%;display:block;border-radius:2px;">
+        <p style="font-size:0.75rem;color:var(--color-text-faint);text-align:center;padding-top:0.75rem;margin:0;">Watermarked preview • Full resolution &amp; physical products available below</p>
       </div>
+      {% endif %}
     </div>
-    {% endif %}
 
-    {% if artwork.description and not artwork.story %}
-    <div style="margin-bottom:3rem;">
-      <p style="font-size:1.05rem;line-height:1.8;color:var(--color-text);">{{ artwork.description|linebreaks }}</p>
-    </div>
-    {% endif %}
+    {# Artwork Description & Details #}
+    <div>
+      <h2 style="font-family:'Cinzel',serif;font-size:1.75rem;margin-bottom:1rem;color:var(--color-text-title);">About This Piece</h2>
+      {% if artwork.description %}
+      <div style="font-size:1rem;line-height:1.8;color:var(--color-text);margin-bottom:2rem;">
+        {{ artwork.description|linebreaks }}
+      </div>
+      {% endif %}
 
-    {# ── Process Images ── #}
-    {% if process_images %}
-    <div style="margin-bottom:3rem;">
-      <p class="text-upper text-muted" style="margin-bottom:1.5rem;">The Process</p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;">
-        {% for step in process_images %}
-        <figure style="margin:0;">
-          {% if step.url %}
-          <img src="{{ step.url }}" alt="{{ step.label }}" loading="lazy"
-               style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+      {# Process steps if available #}
+      {% if process_images or original_pencil_url or colored_url %}
+      <div style="margin-top:2rem;">
+        <h3 style="font-size:1rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted);margin-bottom:1rem;">Creative Process Steps</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:0.75rem;">
+          {% if original_pencil_url %}
+          <div style="text-align:center;border:1px solid var(--color-border);padding:0.4rem;background:var(--color-card-bg);border-radius:4px;">
+            <img src="{{ original_pencil_url }}" alt="Original pencil sketch" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:2px;display:block;">
+            <span style="font-size:0.7rem;color:var(--color-text-muted);display:block;margin-top:0.3rem;">Sketch</span>
+          </div>
           {% endif %}
-          <figcaption style="padding:0.6rem 0;font-size:0.8rem;color:var(--color-text-muted);">
-            {% if step.label %}<strong>{{ step.label }}</strong><br>{% endif %}
-            {{ step.caption }}
-          </figcaption>
-        </figure>
-        {% endfor %}
+          {% if colored_url %}
+          <div style="text-align:center;border:1px solid var(--color-border);padding:0.4rem;background:var(--color-card-bg);border-radius:4px;">
+            <img src="{{ colored_url }}" alt="Colored version" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:2px;display:block;">
+            <span style="font-size:0.7rem;color:var(--color-text-muted);display:block;margin-top:0.3rem;">Coloring</span>
+          </div>
+          {% endif %}
+          {% for step in process_images %}
+          {% if step.url %}
+          <div style="text-align:center;border:1px solid var(--color-border);padding:0.4rem;background:var(--color-card-bg);border-radius:4px;">
+            <img src="{{ step.url }}" alt="{{ step.label }}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:2px;display:block;">
+            <span style="font-size:0.7rem;color:var(--color-text-muted);display:block;margin-top:0.3rem;">{{ step.label|default:"Process" }}</span>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {# Custom Commission Callout #}
+      <div style="margin-top:2.5rem;background:var(--color-card-bg);border:1px solid var(--color-border);padding:1.5rem;border-radius:6px;">
+        <h4 style="font-size:1rem;margin-bottom:0.5rem;color:var(--color-text-title);">Want a Custom Design in This Style?</h4>
+        <p style="font-size:0.875rem;color:var(--color-text-muted);margin-bottom:1rem;">Commission original hand-drawn artwork, brand logos, or exclusive digital designs created specifically for you.</p>
+        <a href="{% url 'commissions:commission_request' %}" class="btn btn-outline btn-sm">Request Custom Commission</a>
       </div>
     </div>
-    {% endif %}
-
-    {# ── Original Pencil + Colored ── #}
-    {% if original_pencil_url or colored_url %}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:3rem;">
-      {% if original_pencil_url %}
-      <figure style="margin:0;">
-        <img src="{{ original_pencil_url }}" alt="Original pencil sketch - {{ artwork.title }}"
-             loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;">
-        <figcaption style="padding:0.5rem 0;font-size:0.75rem;color:var(--color-text-muted);">Original Sketch</figcaption>
-      </figure>
-      {% endif %}
-      {% if colored_url %}
-      <figure style="margin:0;">
-        <img src="{{ colored_url }}" alt="Colored version - {{ artwork.title }}"
-             loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;">
-        <figcaption style="padding:0.5rem 0;font-size:0.75rem;color:var(--color-text-muted);">Colored Version</figcaption>
-      </figure>
-      {% endif %}
-    </div>
-    {% endif %}
   </div>
 
-  {# Right: Product cards + Full preview #}
-  <div style="position:sticky;top:calc(var(--nav-height) + 2rem);">
-    {# Large preview image #}
-    {% if preview_url %}
-    <div style="margin-bottom:2rem;">
-      <img src="{{ preview_url }}" alt="{{ artwork.title }} - watermarked preview"
-           style="width:100%;display:block;border:1px solid var(--color-border);">
-      <p style="font-size:0.7rem;color:var(--color-text-faint);text-align:center;padding:0.4rem 0;">Watermarked preview - full resolution unlocked after purchase</p>
+  {# ── SECTION: Products Created From This Artwork ── #}
+  <section style="border-top:1px solid var(--color-border);padding-top:3rem;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:2rem;">
+      <div>
+        <p class="text-upper text-accent" style="font-size:0.8rem;letter-spacing:0.08em;margin-bottom:0.25rem;">Official Merchandise &amp; Downloads</p>
+        <h2 style="font-family:'Cinzel',serif;font-size:1.85rem;color:var(--color-text-title);">Products Created From This Artwork</h2>
+      </div>
     </div>
-    {% endif %}
 
-    {# Products #}
     {% if products %}
-    <div style="display:flex;flex-direction:column;gap:1rem;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.75rem;">
       {% for product in products %}
-      <div style="border:1px solid var(--color-border);padding:1.25rem;">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.75rem;">
-          <div>
-            <p class="text-upper text-muted" style="font-size:0.7rem;margin-bottom:0.25rem;">{{ product.get_product_type_display }}</p>
-            <h4 style="font-size:1rem;">{{ product.title }}</h4>
-          </div>
-          <div style="text-align:right;">
-            <p style="font-family:var(--font-display);font-size:1.25rem;color:var(--color-white);">${{ product.price_usd|floatformat:2 }}</p>
-          </div>
+      <div class="card" style="background:var(--color-card-bg);border:1px solid var(--color-border);border-radius:6px;overflow:hidden;display:flex;flex-direction:column;">
+        <div style="position:relative;aspect-ratio:1;background:var(--color-bg);overflow:hidden;">
+          {% if product.preview_url %}
+          <img src="{{ product.preview_url }}" alt="{{ product.title }}" loading="lazy" style="width:100%;height:100%;object-fit:cover;transition:transform 0.3s ease;">
+          {% else %}
+          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--color-text-faint);">No preview available</div>
+          {% endif %}
+          <span style="position:absolute;top:0.75rem;left:0.75rem;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);color:var(--color-text-muted);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;padding:0.25rem 0.5rem;border-radius:2px;border:1px solid var(--color-border);">
+            {{ product.get_product_type_display }}
+          </span>
         </div>
 
-        {% if product.product_type == 'limited' and product.limited_detail %}
-        <p style="font-size:0.8rem;color:var(--color-accent-light);margin-bottom:0.75rem;">
-          {{ product.limited_detail.remaining }} of {{ product.limited_detail.edition_size }} remaining
-        </p>
-        {% endif %}
-
-        <a href="{% url 'store:product_detail' product.slug %}" class="btn btn-primary" style="width:100%;justify-content:center;">
-          View Product
-        </a>
+        <div style="padding:1.25rem;display:flex;flex-direction:column;flex-grow:1;">
+          <h3 style="font-size:1rem;margin-bottom:0.5rem;color:var(--color-text-title);line-height:1.4;">{{ product.title }}</h3>
+          <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding-top:1rem;border-top:1px solid var(--color-border);">
+            <span style="font-family:var(--font-display);font-size:1.25rem;color:var(--color-text-title);font-weight:700;">
+              ${{ product.price_usd|floatformat:2 }} <span style="font-size:0.75rem;color:var(--color-text-muted);">USD</span>
+            </span>
+            <a href="{% url 'store:product_detail' product.slug %}" class="btn btn-primary btn-sm">View Product</a>
+          </div>
+        </div>
       </div>
       {% endfor %}
     </div>
-    {% endif %}
-
-    {# Commission CTA #}
-    <div style="margin-top:1.5rem;border:1px solid var(--color-border);padding:1.25rem;text-align:center;">
-      <p style="font-size:0.875rem;color:var(--color-text-muted);margin-bottom:1rem;">
-        Want a custom piece in this style?
-      </p>
-      <a href="{% url 'commissions:commission_request' %}" class="btn btn-outline" style="width:100%;justify-content:center;">
-        Request Commission
-      </a>
+    {% else %}
+    <div style="text-align:center;padding:3rem 1rem;background:var(--color-card-bg);border:1px solid var(--color-border);border-radius:6px;">
+      <p style="color:var(--color-text-muted);margin-bottom:1rem;">No store products assigned to this artwork yet.</p>
+      <a href="{% url 'store:shop' %}" class="btn btn-outline btn-sm">Browse Full Shop</a>
     </div>
-  </div>
+    {% endif %}
+  </section>
+
 </div>
 
 {# Structured Data - CreativeWork #}
@@ -151,12 +144,9 @@
 {% endblock %}
 
 <style>
-@media (max-width: 900px) {
-  .container > div[style*="grid-template-columns:1fr 380px"] {
+@media (max-width: 800px) {
+  .container > div[style*="grid-template-columns:1fr 1fr"] {
     grid-template-columns: 1fr !important;
-  }
-  .container > div[style*="grid-template-columns:1fr 380px"] > div[style*="sticky"] {
-    position: static !important;
   }
 }
 </style>

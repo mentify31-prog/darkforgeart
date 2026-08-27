@@ -246,3 +246,6 @@ PRINTIFY_INCLUDED_SHIPPING_USD = float(os.environ.get("PRINTIFY_INCLUDED_SHIPPIN
 # ─── Currency Conversion ──────────────────────────────────────────────────────
 # KES to USD exchange rate for frontend display (1 USD = 130 KES default)
 USD_EXCHANGE_RATE = float(os.environ.get("USD_EXCHANGE_RATE", "130.0"))
+
+# ─── Pinterest Analytics & Conversion Tag ─────────────────────────────────────
+PINTEREST_TAG_ID = os.environ.get("PINTEREST_TAG_ID", "")
