@@ -90,7 +90,7 @@ class Command(BaseCommand):
             product, created = Product.objects.get_or_create(
                 title=title,
                 defaults={
-                    "artwork": default_artwork,
+                    "artwork": None,
                     "product_type": ProductType.PHYSICAL,
                     "description": full_desc,
                     "price": base_price_kes,

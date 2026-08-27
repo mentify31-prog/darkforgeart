@@ -224,7 +224,7 @@ class Command(BaseCommand):
             product, created = Product.objects.get_or_create(
                 title=p_name,
                 defaults={
-                    "artwork": default_artwork,
+                    "artwork": None,
                     "product_type": ProductType.PHYSICAL,
                     "description": f"High quality physical merchandise printed and fulfilled by Printful.\n\n{p_name}",
                     "price": base_price_kes,
