@@ -7,18 +7,11 @@ Includes GitHub image upload handling via the admin form.
 import io
 
 from django import forms
-from django.contrib import admin, messages
+from django.contrib import admin
 from django.utils.html import format_html
 
 from .models import Artwork, ArtworkImage, ArtworkTag
 from store.models import Product
-
-
-class ProductInline(admin.TabularInline):
-    model = Product
-    extra = 0
-    fields = ["title", "product_type", "price", "currency", "is_active"]
-    show_change_link = True
 
 
 class ArtworkImageInline(admin.TabularInline):
@@ -31,8 +24,8 @@ class ArtworkImageInline(admin.TabularInline):
 class ArtworkAdminForm(forms.ModelForm):
     """
     Admin form that accepts file uploads and pushes them to GitHub.
-    The file fields are optional - if a stored_path is already set and no new file
-    is uploaded, the existing path is preserved.
+    Also provides a multi-select widget to assign existing store products
+    to this artwork.
     """
     upload_original = forms.FileField(required=False, label="Upload Original Pencil Scan")
     upload_colored = forms.FileField(required=False, label="Upload Colored Version")
@@ -44,9 +37,29 @@ class ArtworkAdminForm(forms.ModelForm):
         label="Auto-watermark final file as preview (only if 'Upload Final Artwork' is provided)",
     )
 
+    # ── Select existing products to assign to this artwork ─────────────────────
+    linked_products = forms.ModelMultipleChoiceField(
+        queryset=Product.objects.filter(is_active=True).order_by("title"),
+        required=False,
+        label="Assign Store Products",
+        help_text=(
+            "Select existing products from your store to display on this artwork's page. "
+            "Use Ctrl/Cmd+click to select multiple. Hold Shift to select a range."
+        ),
+        widget=forms.SelectMultiple(attrs={"size": "12", "style": "min-width:420px;"}),
+    )
+
     class Meta:
         model = Artwork
         fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Pre-populate with products currently assigned to this artwork
+        if self.instance and self.instance.pk:
+            self.fields["linked_products"].initial = Product.objects.filter(
+                artwork=self.instance
+            ).values_list("pk", flat=True)
 
     def save(self, commit=True):
         artwork = super().save(commit=False)
@@ -56,10 +69,10 @@ class ArtworkAdminForm(forms.ModelForm):
         try:
             github = get_github_service()
         except ValueError:
-            # GitHub not configured - skip uploads, save as-is
             if commit:
                 artwork.save()
                 self.save_m2m()
+                self._save_linked_products(artwork)
             return artwork
 
         slug = artwork.slug or artwork.title
@@ -88,7 +101,6 @@ class ArtworkAdminForm(forms.ModelForm):
             if result:
                 artwork.final_url = result.stored_path
 
-            # Auto-generate watermarked preview from final file
             if self.cleaned_data.get("auto_generate_preview"):
                 final_file.seek(0)
                 preview_bytes = create_preview_from_upload(final_file, slug=slug, style=artwork.style)
@@ -115,7 +127,23 @@ class ArtworkAdminForm(forms.ModelForm):
         if commit:
             artwork.save()
             self.save_m2m()
+            self._save_linked_products(artwork)
         return artwork
+
+    def _save_linked_products(self, artwork):
+        """
+        Assign the selected products to this artwork (set artwork FK).
+        Deselected products that were previously assigned are unlinked.
+        """
+        selected = set(self.cleaned_data.get("linked_products", []))
+        selected_pks = {p.pk for p in selected}
+
+        # Unlink products that were previously assigned but are no longer selected
+        Product.objects.filter(artwork=artwork).exclude(pk__in=selected_pks).update(artwork=None)
+
+        # Link newly selected products
+        if selected_pks:
+            Product.objects.filter(pk__in=selected_pks).update(artwork=artwork)
 
 
 @admin.register(Artwork)
@@ -124,14 +152,14 @@ class ArtworkAdmin(admin.ModelAdmin):
     show_full_result_count = False
     list_display = [
         "title", "style", "artwork_type", "is_published", "is_featured",
-        "preview_thumb", "created_at",
+        "preview_thumb", "product_count", "created_at",
     ]
     list_filter = ["style", "artwork_type", "is_published", "is_featured"]
     search_fields = ["title", "description"]
     prepopulated_fields = {"slug": ("title",)}
     filter_horizontal = ["tags"]
     readonly_fields = ["created_at", "updated_at", "final_url_warning"]
-    inlines = [ArtworkImageInline, ProductInline]
+    inlines = [ArtworkImageInline]
 
     fieldsets = (
         ("Artwork Info", {
@@ -139,6 +167,13 @@ class ArtworkAdmin(admin.ModelAdmin):
         }),
         ("Publication", {
             "fields": ("is_published", "is_featured"),
+        }),
+        ("Linked Store Products", {
+            "fields": ("linked_products",),
+            "description": (
+                "Select existing products from your store to show on this artwork's page. "
+                "Ctrl/Cmd+click to select multiple."
+            ),
         }),
         ("Image Uploads", {
             "fields": (
@@ -168,6 +203,11 @@ class ArtworkAdmin(admin.ModelAdmin):
             return format_html('<img src="{}" style="height:50px;border-radius:4px;" />', url)
         return " - "
     preview_thumb.short_description = "Preview"
+
+    def product_count(self, obj):
+        count = Product.objects.filter(artwork=obj).count()
+        return count if count else "-"
+    product_count.short_description = "Products"
 
     def final_url_warning(self, obj):
         return format_html(
