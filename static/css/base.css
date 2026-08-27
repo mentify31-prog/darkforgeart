@@ -642,3 +642,30 @@ hr {
   .desktop-only { display: none !important; }
   .mobile-only { display: inline-flex !important; }
 }
+
+/* ─── Theme Toggle Button ─────────────────────────────────────── */
+.theme-toggle {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: var(--color-text-muted) !important;
+  cursor: pointer;
+  padding: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition), transform 0.2s ease;
+  border-radius: 4px;
+}
+
+.theme-toggle:hover {
+  color: var(--color-white) !important;
+  background: transparent !important;
+  transform: scale(1.08);
+}
+
+.theme-toggle svg {
+  display: block;
+  stroke: currentColor;
+}
