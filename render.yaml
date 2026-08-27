@@ -3,7 +3,7 @@ services:
     name: darkforge-art
     env: python
     buildCommand: "./build.sh"
-    startCommand: "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3"
+    startCommand: "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --timeout 120 --keep-alive 5"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0

@@ -45,6 +45,11 @@ if RENDER_EXTERNAL_HOSTNAME:
     if origin not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(origin)
 
+# ─── File Upload Limits ───────────────────────────────────────────────────────
+# Allows artwork image uploads up to 50MB (default is 2.5MB which is too small)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800   # 50 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800   # 50 MB
+
 
 # ─── Applications ─────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
