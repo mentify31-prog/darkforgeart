@@ -41,8 +41,10 @@ class Product(models.Model):
     """
     artwork = models.ForeignKey(
         Artwork,
-        on_delete=models.PROTECT,
+        on_delete=models.SET_NULL,
         related_name="products",
+        null=True,
+        blank=True,
     )
     product_type = models.CharField(
         max_length=20,
