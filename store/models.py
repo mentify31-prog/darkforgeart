@@ -132,7 +132,16 @@ class Product(models.Model):
                 return phys.mockup_image_url
         if self.artwork:
             return self.artwork.get_preview_public_url()
+        # Fallback for digital products if artwork FK is unassigned:
+        if self.product_type in (ProductType.DIGITAL, ProductType.LICENSE):
+            dig = getattr(self, "digital_detail", None)
+            if dig and dig.file_url:
+                from gallery.models import Artwork
+                art = Artwork.objects.filter(final_url=dig.file_url).first()
+                if art:
+                    return art.get_preview_public_url()
         return ""
+
 
     def get_type_detail(self):
         """Return the type-specific sub-object, or None."""
