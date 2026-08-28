@@ -17,9 +17,8 @@ from store.models import Product
 
 class ProductThumbnailWidget(forms.Widget):
     """
-    Renders each active product as a clickable visual card with its mockup
-    image, name, type and price — entirely server-side, no DOM transformation.
-    JS only handles the click-to-toggle behaviour.
+    Renders active products as interactive thumbnail cards with visible checkboxes,
+    search filtering, and multi-column grid layout.
     """
 
     def __init__(self, *args, **kwargs):
@@ -40,13 +39,21 @@ class ProductThumbnailWidget(forms.Widget):
         return []
 
     def render(self, name, value, attrs=None, renderer=None):
-        selected_pks = {str(v) for v in (value or [])}
+        # Normalize selected values to strings
+        selected_pks = set()
+        if value:
+            for v in value:
+                if hasattr(v, "pk"):
+                    selected_pks.add(str(v.pk))
+                else:
+                    selected_pks.add(str(v))
 
         cards_html = ""
         for product in self._products:
             pk = str(product.pk)
-            checked = "checked" if pk in selected_pks else ""
-            selected_cls = "selected" if pk in selected_pks else ""
+            is_checked = pk in selected_pks
+            checked_attr = 'checked="checked"' if is_checked else ""
+            selected_cls = "selected" if is_checked else ""
 
             phys = getattr(product, "physical_detail", None)
             if phys and getattr(phys, "mockup_image_url", ""):
@@ -66,20 +73,19 @@ class ProductThumbnailWidget(forms.Widget):
                 media = '<div class="pti-no-img">📷</div>'
 
             cards_html += (
-                f'<label class="pti-card {selected_cls}" title="{title}">'
-                f'<input type="checkbox" name="{name}" value="{pk}" {checked} class="pti-checkbox">'
+                f'<div class="pti-card {selected_cls}" data-pk="{pk}" data-title="{title.lower()}">'
+                f'<input type="checkbox" name="{name}" value="{pk}" {checked_attr} class="pti-checkbox">'
                 f'{media}'
                 f'<div class="pti-info">'
-                f'<div class="pti-name">{title}</div>'
+                f'<div class="pti-name" title="{title}">{title}</div>'
                 f'<div class="pti-meta">{ptype} · {price}</div>'
                 f'</div>'
-                f'</label>'
+                f'</div>'
             )
 
         count = len(selected_pks)
         html = f"""
 <style>
-/* Override Django Admin's narrow floated field containers */
 .field-linked_products {{
     clear: both !important;
     width: 100% !important;
@@ -102,37 +108,62 @@ class ProductThumbnailWidget(forms.Widget):
     width: 100% !important;
     margin-bottom: 6px !important;
 }}
-.pti-checkbox {{
-    position: absolute !important;
-    opacity: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-    margin: 0 !important;
-    pointer-events: none !important;
-}}
 .pti-wrapper {{
     border: 1px solid #333;
     border-radius: 6px;
     background: #141414;
-    padding: 10px;
+    padding: 12px;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
     clear: both !important;
     display: block !important;
 }}
+.pti-header {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #2a2a2a;
+}}
 .pti-summary {{
-    cursor: pointer;
-    font-weight: 600;
+    font-weight: 700;
     color: #eee;
-    font-size: 0.85rem;
-    user-select: none;
-    outline: none;
+    font-size: 0.88rem;
+}}
+.pti-controls {{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}}
+.pti-search {{
+    background: #222;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    width: 160px;
+}}
+.pti-btn {{
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    background: #2a2a2a;
+    color: #ddd;
+    border: 1px solid #555;
+    border-radius: 3px;
+    cursor: pointer;
+}}
+.pti-btn:hover {{
+    background: #3a3a3a;
+    color: #fff;
 }}
 .pti-scroll-box {{
-    max-height: 380px;
+    max-height: 400px;
     overflow-y: auto;
-    margin-top: 10px;
     padding: 8px;
     border: 1px solid #282828;
     border-radius: 4px;
@@ -149,33 +180,43 @@ class ProductThumbnailWidget(forms.Widget):
 }}
 .pti-grid {{
     display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
-    gap: 8px !important;
+    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)) !important;
+    gap: 10px !important;
     width: 100% !important;
     box-sizing: border-box !important;
 }}
 .pti-card {{
     position: relative !important;
-    border: 1px solid #333;
-    border-radius: 5px;
+    border: 2px solid #333;
+    border-radius: 6px;
     overflow: hidden;
     cursor: pointer;
     background: #1a1a1a;
     display: flex !important;
     flex-direction: column !important;
-    text-decoration: none;
     transition: all .15s ease;
     box-sizing: border-box !important;
     width: 100% !important;
-    margin: 0 !important;
+    user-select: none;
 }}
 .pti-card:hover {{
     border-color: #777;
+    transform: translateY(-1px);
 }}
 .pti-card.selected {{
     border-color: #d90429;
     background: #2a0a0f;
     box-shadow: 0 0 0 1px #d90429;
+}}
+.pti-checkbox {{
+    position: absolute !important;
+    top: 6px;
+    left: 6px;
+    width: 18px !important;
+    height: 18px !important;
+    z-index: 5;
+    cursor: pointer;
+    accent-color: #d90429;
 }}
 .pti-card img {{
     width: 100% !important;
@@ -191,18 +232,18 @@ class ProductThumbnailWidget(forms.Widget):
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     background: #111;
     color: #666;
 }}
 .pti-info {{
-    padding: 4px 6px;
+    padding: 6px 8px;
     display: flex;
     flex-direction: column;
     gap: 2px;
 }}
 .pti-name {{
-    font-size: 0.65rem;
+    font-size: 0.68rem;
     font-weight: 600;
     color: #ddd;
     line-height: 1.2;
@@ -211,27 +252,33 @@ class ProductThumbnailWidget(forms.Widget):
     text-overflow: ellipsis;
 }}
 .pti-meta {{
-    font-size: 0.60rem;
+    font-size: 0.62rem;
     color: #888;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }}
 </style>
-<details class="pti-wrapper" open>
-  <summary class="pti-summary">
-    Linked Store Products (<span id="pti-count-{name}">{count}</span> selected)
-    <button type="button" id="pti-clear-{name}" style="margin-left:12px;font-size:0.7rem;padding:2px 8px;background:#2a2a2a;color:#eee;border:1px solid #555;border-radius:3px;cursor:pointer;">Deselect All</button>
-  </summary>
+<div class="pti-wrapper">
+  <div class="pti-header">
+    <div class="pti-summary">
+      Linked Store Products (<span id="pti-count-{name}">{count}</span> selected)
+    </div>
+    <div class="pti-controls">
+      <input type="text" id="pti-search-{name}" class="pti-search" placeholder="Search products...">
+      <button type="button" id="pti-clear-{name}" class="pti-btn">Deselect All</button>
+    </div>
+  </div>
   <div class="pti-scroll-box">
     <div class="pti-grid" id="pti-grid-{name}">{cards_html}</div>
   </div>
-</details>
+</div>
 <script>
 (function(){{
   var grid = document.getElementById('pti-grid-{name}');
   var countEl = document.getElementById('pti-count-{name}');
   var clearBtn = document.getElementById('pti-clear-{name}');
+  var searchInput = document.getElementById('pti-search-{name}');
   if (!grid) return;
   
   function updateCount() {{
@@ -240,36 +287,54 @@ class ProductThumbnailWidget(forms.Widget):
     }}
   }}
 
-  grid.querySelectorAll('input.pti-checkbox').forEach(function(cb){{
-    cb.addEventListener('change', function(){{
-      var card = cb.closest('.pti-card');
-      if (card) {{
-        card.classList.toggle('selected', cb.checked);
-      }}
-      updateCount();
-    }});
+  // Card click handler (delegated)
+  grid.addEventListener('click', function(e){{
+    var card = e.target.closest('.pti-card');
+    if (!card) return;
+    
+    var cb = card.querySelector('input.pti-checkbox');
+    if (!cb) return;
+
+    // If user clicked directly on the checkbox, let native event toggle it
+    if (e.target !== cb) {{
+      cb.checked = !cb.checked;
+    }}
+    
+    card.classList.toggle('selected', cb.checked);
+    updateCount();
   }});
 
+  // Deselect All
   if (clearBtn) {{
     clearBtn.addEventListener('click', function(e){{
       e.preventDefault();
-      e.stopPropagation();
-      grid.querySelectorAll('input.pti-checkbox').forEach(function(cb){{
-        cb.checked = false;
-        var card = cb.closest('.pti-card');
-        if (card) card.classList.remove('selected');
+      grid.querySelectorAll('.pti-card').forEach(function(card){{
+        var cb = card.querySelector('input.pti-checkbox');
+        if (cb) cb.checked = false;
+        card.classList.remove('selected');
       }});
       updateCount();
     }});
   }}
+
+  // Search / Filter
+  if (searchInput) {{
+    searchInput.addEventListener('input', function(){{
+      var q = searchInput.value.toLowerCase().trim();
+      grid.querySelectorAll('.pti-card').forEach(function(card){{
+        var title = card.getAttribute('data-title') || '';
+        if (!q || title.indexOf(q) !== -1) {{
+          card.style.display = '';
+        }} else {{
+          card.style.display = 'none';
+        }}
+      }});
+    }});
+  }}
 }})();
 </script>
-
 """
         return mark_safe(html)
-
-
-
 
 
 class ArtworkImageInline(admin.TabularInline):
@@ -298,7 +363,7 @@ class ArtworkAdminForm(forms.ModelForm):
         queryset=Product.objects.none(),
         required=False,
         label="Assign Store Products",
-        help_text="Click a product card to select/deselect it. Selected cards highlight red.",
+        help_text="Click any product card to select or deselect it. Selected cards highlight red with a checkmark.",
     )
 
     class Meta:
@@ -308,7 +373,6 @@ class ArtworkAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Build the widget with all active products pre-fetched
         products = list(
             Product.objects.filter(is_active=True)
             .select_related("physical_detail", "artwork")
@@ -408,12 +472,23 @@ class ArtworkAdminForm(forms.ModelForm):
 
     def _save_linked_products(self, artwork):
         """Set artwork FK on selected products; clear it on deselected ones."""
-        selected_products = self.cleaned_data.get("linked_products") or []
-        selected_pks = {p.pk for p in selected_products}
+        raw_selected = self.cleaned_data.get("linked_products") or []
+        selected_pks = set()
+        for item in raw_selected:
+            if hasattr(item, "pk"):
+                selected_pks.add(item.pk)
+            else:
+                try:
+                    selected_pks.add(int(item))
+                except (ValueError, TypeError):
+                    pass
+
+        # Unlink products no longer selected
         Product.objects.filter(artwork=artwork).exclude(pk__in=selected_pks).update(artwork=None)
+
+        # Link selected products to this artwork
         if selected_pks:
             Product.objects.filter(pk__in=selected_pks).update(artwork=artwork)
-
 
 
 @admin.register(Artwork)
@@ -440,7 +515,7 @@ class ArtworkAdmin(admin.ModelAdmin):
         }),
         ("Linked Store Products", {
             "fields": ("linked_products",),
-            "description": "Click a product card to select it. Selected cards highlight red. Hit Save when done.",
+            "description": "Click any product card to select/deselect it. Selected cards highlight red.",
         }),
         ("Image Uploads", {
             "fields": (
