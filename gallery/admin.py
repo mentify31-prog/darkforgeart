@@ -72,19 +72,114 @@ class ProductThumbnailWidget(forms.Widget):
         count = len(selected_pks)
         html = f"""
 <style>
-.pti-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:8px;}}
-.pti-card{{border:2px solid #444;border-radius:6px;overflow:hidden;cursor:pointer;background:#1a1a1a;display:block;transition:border-color .15s;}}
-.pti-card:hover{{border-color:#888;}}
-.pti-card.selected{{border-color:#d90429;background:#2a0a0f;}}
-.pti-card img{{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#111;}}
-.pti-no-img{{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:2rem;background:#111;}}
-.pti-info{{padding:6px 8px;}}
-.pti-name{{font-size:0.72rem;font-weight:600;color:#ddd;line-height:1.3;margin-bottom:2px;}}
-.pti-meta{{font-size:0.65rem;color:#888;}}
-.pti-count{{margin-top:8px;font-size:0.8rem;color:#aaa;}}
+.pti-wrapper {{
+    border: 1px solid #333;
+    border-radius: 6px;
+    background: #141414;
+    padding: 10px;
+    max-width: 100%;
+    box-sizing: border-box;
+}}
+.pti-summary {{
+    cursor: pointer;
+    font-weight: 600;
+    color: #eee;
+    font-size: 0.85rem;
+    user-select: none;
+    outline: none;
+}}
+.pti-scroll-box {{
+    max-height: 380px;
+    overflow-y: auto;
+    margin-top: 10px;
+    padding-right: 4px;
+    border: 1px solid #282828;
+    border-radius: 4px;
+    background: #0d0d0d;
+    padding: 8px;
+}}
+.pti-scroll-box::-webkit-scrollbar {{
+    width: 6px;
+}}
+.pti-scroll-box::-webkit-scrollbar-thumb {{
+    background: #444;
+    border-radius: 3px;
+}}
+.pti-grid {{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}}
+.pti-card {{
+    border: 1px solid #333;
+    border-radius: 5px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    transition: all .15s ease;
+    box-sizing: border-box;
+}}
+.pti-card:hover {{
+    border-color: #777;
+}}
+.pti-card.selected {{
+    border-color: #d90429;
+    background: #2a0a0f;
+    box-shadow: 0 0 0 1px #d90429;
+}}
+.pti-card img {{
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+    background: #111;
+}}
+.pti-no-img {{
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background: #111;
+    color: #666;
+}}
+.pti-info {{
+    padding: 4px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}}
+.pti-name {{
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #ddd;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}}
+.pti-meta {{
+    font-size: 0.60rem;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}}
 </style>
-<div class="pti-grid" id="pti-grid-{name}">{cards_html}</div>
-<div class="pti-count" id="pti-count-{name}">{count} product(s) selected</div>
+<details class="pti-wrapper" open>
+  <summary class="pti-summary">
+    Linked Store Products (<span id="pti-count-{name}">{count}</span> selected)
+  </summary>
+  <div class="pti-scroll-box">
+    <div class="pti-grid" id="pti-grid-{name}">{cards_html}</div>
+  </div>
+</details>
 <script>
 (function(){{
   var grid = document.getElementById('pti-grid-{name}');
@@ -96,13 +191,16 @@ class ProductThumbnailWidget(forms.Widget):
       var cb = card.querySelector('input[type=checkbox]');
       cb.checked = !cb.checked;
       card.classList.toggle('selected', cb.checked);
-      countEl.textContent = grid.querySelectorAll('.selected').length + ' product(s) selected';
+      if (countEl) {{
+        countEl.textContent = grid.querySelectorAll('.selected').length;
+      }}
     }});
   }});
 }})();
 </script>
 """
         return mark_safe(html)
+
 
 
 class ArtworkImageInline(admin.TabularInline):
