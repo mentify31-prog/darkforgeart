@@ -221,6 +221,7 @@ class ProductThumbnailWidget(forms.Widget):
 <details class="pti-wrapper" open>
   <summary class="pti-summary">
     Linked Store Products (<span id="pti-count-{name}">{count}</span> selected)
+    <button type="button" id="pti-clear-{name}" style="margin-left:12px;font-size:0.7rem;padding:2px 8px;background:#2a2a2a;color:#eee;border:1px solid #555;border-radius:3px;cursor:pointer;">Deselect All</button>
   </summary>
   <div class="pti-scroll-box">
     <div class="pti-grid" id="pti-grid-{name}">{cards_html}</div>
@@ -230,6 +231,7 @@ class ProductThumbnailWidget(forms.Widget):
 (function(){{
   var grid = document.getElementById('pti-grid-{name}');
   var countEl = document.getElementById('pti-count-{name}');
+  var clearBtn = document.getElementById('pti-clear-{name}');
   if (!grid) return;
   
   function updateCount() {{
@@ -247,8 +249,22 @@ class ProductThumbnailWidget(forms.Widget):
       updateCount();
     }});
   }});
+
+  if (clearBtn) {{
+    clearBtn.addEventListener('click', function(e){{
+      e.preventDefault();
+      e.stopPropagation();
+      grid.querySelectorAll('input.pti-checkbox').forEach(function(cb){{
+        cb.checked = false;
+        var card = cb.closest('.pti-card');
+        if (card) card.classList.remove('selected');
+      }});
+      updateCount();
+    }});
+  }}
 }})();
 </script>
+
 """
         return mark_safe(html)
 
