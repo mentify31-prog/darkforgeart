@@ -464,14 +464,22 @@ class ArtworkAdminForm(forms.ModelForm):
             if result:
                 artwork.preview_url = result.stored_path
 
+        orig_save_m2m = getattr(self, "save_m2m", None)
+        def custom_save_m2m():
+            if orig_save_m2m:
+                orig_save_m2m()
+            self._save_linked_products(artwork)
+        self.save_m2m = custom_save_m2m
+
         if commit:
             artwork.save()
             self.save_m2m()
-            self._save_linked_products(artwork)
         return artwork
 
     def _save_linked_products(self, artwork):
         """Set artwork FK on selected products; clear it on deselected ones."""
+        if not hasattr(self, "cleaned_data") or "linked_products" not in self.cleaned_data:
+            return
         raw_selected = self.cleaned_data.get("linked_products") or []
         selected_pks = set()
         for item in raw_selected:
@@ -505,6 +513,11 @@ class ArtworkAdmin(admin.ModelAdmin):
     filter_horizontal = ["tags"]
     readonly_fields = ["created_at", "updated_at", "final_url_warning"]
     inlines = [ArtworkImageInline]
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        form._save_linked_products(form.instance)
+
 
     fieldsets = (
         ("Artwork Info", {
