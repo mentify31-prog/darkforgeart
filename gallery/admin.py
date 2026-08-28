@@ -64,9 +64,9 @@ class ProductThumbnailWidget(forms.CheckboxSelectMultiple):
 (function(){
   var wrap = document.getElementById('product-thumb-wrap');
   if(!wrap) return;
-  var ul = wrap.querySelector('ul');
-  if(!ul) return;
-  var items = ul.querySelectorAll('li');
+  // Django CheckboxSelectMultiple renders div > div > label > input, NOT ul > li
+  var checkboxes = wrap.querySelectorAll('input[type=checkbox]');
+  if(!checkboxes.length) return;
   var grid = document.createElement('div');
   grid.className = 'product-thumb-grid';
   var countEl = document.createElement('div');
@@ -75,11 +75,10 @@ class ProductThumbnailWidget(forms.CheckboxSelectMultiple):
     var sel = grid.querySelectorAll('.selected').length;
     countEl.textContent = sel + ' product(s) selected';
   }
-  items.forEach(function(li){
-    var cb = li.querySelector('input[type=checkbox]');
-    if(!cb) return;
+  checkboxes.forEach(function(cb){
     var img = cb.getAttribute('data-img') || '';
-    var pname = li.querySelector('label') ? li.querySelector('label').textContent.trim() : '';
+    var label = cb.closest('label') || cb.parentElement;
+    var pname = label ? label.textContent.trim() : '';
     var ptype = cb.getAttribute('data-type') || '';
     var pprice = cb.getAttribute('data-price') || '';
     var card = document.createElement('div');
