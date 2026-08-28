@@ -72,13 +72,39 @@ class ProductThumbnailWidget(forms.Widget):
         count = len(selected_pks)
         html = f"""
 <style>
+/* Override Django Admin's narrow floated field containers */
+.field-linked_products {{
+    clear: both !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    float: none !important;
+}}
+.field-linked_products > div {{
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+    clear: both !important;
+    box-sizing: border-box !important;
+    float: none !important;
+}}
+.field-linked_products label:first-child {{
+    float: none !important;
+    display: block !important;
+    width: 100% !important;
+    margin-bottom: 6px !important;
+}}
 .pti-wrapper {{
     border: 1px solid #333;
     border-radius: 6px;
     background: #141414;
     padding: 10px;
-    max-width: 100%;
-    box-sizing: border-box;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    clear: both !important;
+    display: block !important;
 }}
 .pti-summary {{
     cursor: pointer;
@@ -92,11 +118,12 @@ class ProductThumbnailWidget(forms.Widget):
     max-height: 380px;
     overflow-y: auto;
     margin-top: 10px;
-    padding-right: 4px;
+    padding: 8px;
     border: 1px solid #282828;
     border-radius: 4px;
     background: #0d0d0d;
-    padding: 8px;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }}
 .pti-scroll-box::-webkit-scrollbar {{
     width: 6px;
@@ -106,11 +133,11 @@ class ProductThumbnailWidget(forms.Widget):
     border-radius: 3px;
 }}
 .pti-grid {{
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
-    gap: 8px;
-    width: 100%;
-    box-sizing: border-box;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }}
 .pti-card {{
     border: 1px solid #333;
@@ -118,11 +145,13 @@ class ProductThumbnailWidget(forms.Widget):
     overflow: hidden;
     cursor: pointer;
     background: #1a1a1a;
-    display: flex;
-    flex-direction: column;
+    display: flex !important;
+    flex-direction: column !important;
     text-decoration: none;
     transition: all .15s ease;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    margin: 0 !important;
 }}
 .pti-card:hover {{
     border-color: #777;
@@ -133,18 +162,19 @@ class ProductThumbnailWidget(forms.Widget):
     box-shadow: 0 0 0 1px #d90429;
 }}
 .pti-card img {{
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-    display: block;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    object-fit: cover !important;
+    display: block !important;
     background: #111;
 }}
 .pti-no-img {{
-    width: 100%;
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     font-size: 1.2rem;
     background: #111;
     color: #666;
@@ -200,6 +230,7 @@ class ProductThumbnailWidget(forms.Widget):
 </script>
 """
         return mark_safe(html)
+
 
 
 
