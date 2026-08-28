@@ -30,7 +30,14 @@ class ProductThumbnailWidget(forms.Widget):
         self._products = list(products)
 
     def value_from_datadict(self, data, files, name):
-        return data.getlist(name)
+        if hasattr(data, "getlist"):
+            return data.getlist(name)
+        if isinstance(data, dict):
+            val = data.get(name, [])
+            if isinstance(val, (list, tuple)):
+                return val
+            return [val] if val else []
+        return []
 
     def render(self, name, value, attrs=None, renderer=None):
         selected_pks = {str(v) for v in (value or [])}
@@ -60,7 +67,7 @@ class ProductThumbnailWidget(forms.Widget):
 
             cards_html += (
                 f'<label class="pti-card {selected_cls}" title="{title}">'
-                f'<input type="checkbox" name="{name}" value="{pk}" {checked} style="display:none">'
+                f'<input type="checkbox" name="{name}" value="{pk}" {checked} class="pti-checkbox">'
                 f'{media}'
                 f'<div class="pti-info">'
                 f'<div class="pti-name">{title}</div>'
@@ -94,6 +101,14 @@ class ProductThumbnailWidget(forms.Widget):
     display: block !important;
     width: 100% !important;
     margin-bottom: 6px !important;
+}}
+.pti-checkbox {{
+    position: absolute !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    pointer-events: none !important;
 }}
 .pti-wrapper {{
     border: 1px solid #333;
@@ -140,6 +155,7 @@ class ProductThumbnailWidget(forms.Widget):
     box-sizing: border-box !important;
 }}
 .pti-card {{
+    position: relative !important;
     border: 1px solid #333;
     border-radius: 5px;
     overflow: hidden;
@@ -215,21 +231,27 @@ class ProductThumbnailWidget(forms.Widget):
   var grid = document.getElementById('pti-grid-{name}');
   var countEl = document.getElementById('pti-count-{name}');
   if (!grid) return;
-  grid.querySelectorAll('.pti-card').forEach(function(card){{
-    card.addEventListener('click', function(e){{
-      e.preventDefault();
-      var cb = card.querySelector('input[type=checkbox]');
-      cb.checked = !cb.checked;
-      card.classList.toggle('selected', cb.checked);
-      if (countEl) {{
-        countEl.textContent = grid.querySelectorAll('.selected').length;
+  
+  function updateCount() {{
+    if (countEl) {{
+      countEl.textContent = grid.querySelectorAll('input.pti-checkbox:checked').length;
+    }}
+  }}
+
+  grid.querySelectorAll('input.pti-checkbox').forEach(function(cb){{
+    cb.addEventListener('change', function(){{
+      var card = cb.closest('.pti-card');
+      if (card) {{
+        card.classList.toggle('selected', cb.checked);
       }}
+      updateCount();
     }});
   }});
 }})();
 </script>
 """
         return mark_safe(html)
+
 
 
 
