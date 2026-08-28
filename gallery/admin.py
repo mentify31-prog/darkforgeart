@@ -14,6 +14,100 @@ from .models import Artwork, ArtworkImage, ArtworkTag
 from store.models import Product
 
 
+class ProductThumbnailWidget(forms.CheckboxSelectMultiple):
+    """
+    Checkbox widget that renders each product option with its mockup
+    thumbnail so you can visually identify products when assigning them.
+    """
+    def optgroups(self, name, value, attrs=None):
+        # Pre-fetch all products with their physical_detail in one query
+        qs = self.choices.queryset.select_related("physical_detail", "artwork")
+        self._product_map = {str(p.pk): p for p in qs}
+        return super().optgroups(name, value, attrs)
+
+    def create_option(self, name, value, label, selected, index, subgroup=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subgroup, attrs)
+        pk = str(value)
+        product = self._product_map.get(pk) if hasattr(self, "_product_map") else None
+        if product:
+            img_url = ""
+            phys = getattr(product, "physical_detail", None)
+            if phys and getattr(phys, "mockup_image_url", ""):
+                img_url = phys.mockup_image_url
+            elif product.artwork:
+                img_url = product.artwork.get_preview_public_url()
+            option["attrs"]["data-img"] = img_url
+            option["attrs"]["data-type"] = product.get_product_type_display()
+            option["attrs"]["data-price"] = f"${product.price_usd:.2f}"
+        return option
+
+    def render(self, name, value, attrs=None, renderer=None):
+        # Render the standard checkboxes then inject JS to turn them into cards
+        output = super().render(name, value, attrs, renderer)
+        style = """
+<style>
+.product-thumb-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-top:8px; }
+.product-thumb-item { border:2px solid #333; border-radius:6px; overflow:hidden; cursor:pointer; transition:border-color .15s; background:#1a1a1a; }
+.product-thumb-item:hover { border-color:#888; }
+.product-thumb-item.selected { border-color:#d90429; background:#2a0a0f; }
+.product-thumb-item input[type=checkbox] { display:none; }
+.product-thumb-item img { width:100%; aspect-ratio:1; object-fit:cover; display:block; background:#111; }
+.product-thumb-item .no-img { width:100%; aspect-ratio:1; display:flex; align-items:center; justify-content:center; color:#555; font-size:2rem; background:#111; }
+.product-thumb-item .info { padding:6px 8px; }
+.product-thumb-item .info .pname { font-size:0.72rem; font-weight:600; color:#ddd; line-height:1.3; margin-bottom:2px; }
+.product-thumb-item .info .pmeta { font-size:0.65rem; color:#888; }
+.product-thumb-selected-count { margin-top:6px; font-size:0.8rem; color:#aaa; }
+</style>
+"""
+        script = """
+<script>
+(function(){
+  var wrap = document.getElementById('product-thumb-wrap');
+  if(!wrap) return;
+  var ul = wrap.querySelector('ul');
+  if(!ul) return;
+  var items = ul.querySelectorAll('li');
+  var grid = document.createElement('div');
+  grid.className = 'product-thumb-grid';
+  var countEl = document.createElement('div');
+  countEl.className = 'product-thumb-selected-count';
+  function updateCount(){
+    var sel = grid.querySelectorAll('.selected').length;
+    countEl.textContent = sel + ' product(s) selected';
+  }
+  items.forEach(function(li){
+    var cb = li.querySelector('input[type=checkbox]');
+    if(!cb) return;
+    var img = cb.getAttribute('data-img') || '';
+    var pname = li.querySelector('label') ? li.querySelector('label').textContent.trim() : '';
+    var ptype = cb.getAttribute('data-type') || '';
+    var pprice = cb.getAttribute('data-price') || '';
+    var card = document.createElement('div');
+    card.className = 'product-thumb-item' + (cb.checked ? ' selected' : '');
+    if(img){
+      card.innerHTML = '<img src="'+img+'" alt="'+pname+'" loading="lazy"><div class="info"><div class="pname">'+pname+'</div><div class="pmeta">'+ptype+' &middot; '+pprice+'</div></div>';
+    } else {
+      card.innerHTML = '<div class="no-img">&#128247;</div><div class="info"><div class="pname">'+pname+'</div><div class="pmeta">'+ptype+' &middot; '+pprice+'</div></div>';
+    }
+    card.appendChild(cb);
+    card.addEventListener('click', function(e){
+      e.preventDefault();
+      cb.checked = !cb.checked;
+      card.classList.toggle('selected', cb.checked);
+      updateCount();
+    });
+    grid.appendChild(card);
+  });
+  wrap.innerHTML = '';
+  wrap.appendChild(grid);
+  wrap.appendChild(countEl);
+  updateCount();
+})();
+</script>
+"""
+        return f'<div id="product-thumb-wrap">{output}</div>{style}{script}'
+
+
 class ArtworkImageInline(admin.TabularInline):
     model = ArtworkImage
     extra = 1
@@ -23,9 +117,8 @@ class ArtworkImageInline(admin.TabularInline):
 
 class ArtworkAdminForm(forms.ModelForm):
     """
-    Admin form that accepts file uploads and pushes them to GitHub.
-    Also provides a multi-select widget to assign existing store products
-    to this artwork.
+    Admin form with GitHub image upload handling and a visual thumbnail
+    product selector to assign existing store products to this artwork.
     """
     upload_original = forms.FileField(required=False, label="Upload Original Pencil Scan")
     upload_colored = forms.FileField(required=False, label="Upload Colored Version")
@@ -37,16 +130,12 @@ class ArtworkAdminForm(forms.ModelForm):
         label="Auto-watermark final file as preview (only if 'Upload Final Artwork' is provided)",
     )
 
-    # ── Select existing products to assign to this artwork ─────────────────────
     linked_products = forms.ModelMultipleChoiceField(
         queryset=Product.objects.filter(is_active=True).order_by("title"),
         required=False,
         label="Assign Store Products",
-        help_text=(
-            "Select existing products from your store to display on this artwork's page. "
-            "Use Ctrl/Cmd+click to select multiple. Hold Shift to select a range."
-        ),
-        widget=forms.SelectMultiple(attrs={"size": "12", "style": "min-width:420px;"}),
+        help_text="Click a product card to select/deselect it. Selected cards are highlighted in red.",
+        widget=ProductThumbnailWidget,
     )
 
     class Meta:
@@ -55,7 +144,6 @@ class ArtworkAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Pre-populate with products currently assigned to this artwork
         if self.instance and self.instance.pk:
             self.fields["linked_products"].initial = Product.objects.filter(
                 artwork=self.instance
@@ -131,17 +219,10 @@ class ArtworkAdminForm(forms.ModelForm):
         return artwork
 
     def _save_linked_products(self, artwork):
-        """
-        Assign the selected products to this artwork (set artwork FK).
-        Deselected products that were previously assigned are unlinked.
-        """
+        """Set artwork FK on selected products; clear it on deselected ones."""
         selected = set(self.cleaned_data.get("linked_products", []))
         selected_pks = {p.pk for p in selected}
-
-        # Unlink products that were previously assigned but are no longer selected
         Product.objects.filter(artwork=artwork).exclude(pk__in=selected_pks).update(artwork=None)
-
-        # Link newly selected products
         if selected_pks:
             Product.objects.filter(pk__in=selected_pks).update(artwork=artwork)
 
@@ -170,10 +251,7 @@ class ArtworkAdmin(admin.ModelAdmin):
         }),
         ("Linked Store Products", {
             "fields": ("linked_products",),
-            "description": (
-                "Select existing products from your store to show on this artwork's page. "
-                "Ctrl/Cmd+click to select multiple."
-            ),
+            "description": "Click a product card to select it. Selected cards highlight red.",
         }),
         ("Image Uploads", {
             "fields": (
