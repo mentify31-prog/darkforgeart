@@ -278,8 +278,8 @@ class ArtworkAdminForm(forms.ModelForm):
         label="Auto-watermark final file as preview (only if 'Upload Final Artwork' is provided)",
     )
 
-    linked_products = forms.MultiValueField(
-        fields=(),
+    linked_products = forms.ModelMultipleChoiceField(
+        queryset=Product.objects.none(),
         required=False,
         label="Assign Store Products",
         help_text="Click a product card to select/deselect it. Selected cards highlight red.",
@@ -301,25 +301,28 @@ class ArtworkAdminForm(forms.ModelForm):
         widget = ProductThumbnailWidget()
         widget.set_products(products)
 
-        # Replace linked_products with a simple field backed by our custom widget
-        initial_pks = []
+        self.fields["linked_products"].queryset = Product.objects.filter(is_active=True).order_by("title")
+        self.fields["linked_products"].widget = widget
+
         if self.instance and self.instance.pk:
             initial_pks = list(
                 Product.objects.filter(artwork=self.instance).values_list("pk", flat=True)
             )
-
-        self.fields["linked_products"] = forms.MultipleChoiceField(
-            choices=[(str(p.pk), p.title) for p in products],
-            required=False,
-            label="Assign Store Products",
-            help_text="Click a product card to select/deselect it. Selected cards highlight red.",
-            widget=widget,
-            initial=initial_pks,
-        )
-        self.initial["linked_products"] = [str(pk) for pk in initial_pks]
+            self.fields["linked_products"].initial = initial_pks
 
     def save(self, commit=True):
         artwork = super().save(commit=False)
+
+        # Preserve existing GitHub stored paths if no new file or path was uploaded in form
+        if not artwork.original_pencil_url and self.instance and self.instance.original_pencil_url:
+            artwork.original_pencil_url = self.instance.original_pencil_url
+        if not artwork.colored_url and self.instance and self.instance.colored_url:
+            artwork.colored_url = self.instance.colored_url
+        if not artwork.preview_url and self.instance and self.instance.preview_url:
+            artwork.preview_url = self.instance.preview_url
+        if not artwork.final_url and self.instance and self.instance.final_url:
+            artwork.final_url = self.instance.final_url
+
         from services.github_storage import get_github_service
         from services.watermark import create_preview_from_upload
 
@@ -389,10 +392,12 @@ class ArtworkAdminForm(forms.ModelForm):
 
     def _save_linked_products(self, artwork):
         """Set artwork FK on selected products; clear it on deselected ones."""
-        selected_pks = {int(pk) for pk in self.cleaned_data.get("linked_products", []) if pk}
+        selected_products = self.cleaned_data.get("linked_products") or []
+        selected_pks = {p.pk for p in selected_products}
         Product.objects.filter(artwork=artwork).exclude(pk__in=selected_pks).update(artwork=None)
         if selected_pks:
             Product.objects.filter(pk__in=selected_pks).update(artwork=artwork)
+
 
 
 @admin.register(Artwork)

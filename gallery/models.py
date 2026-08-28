@@ -133,9 +133,16 @@ class Artwork(models.Model):
         return f"{self.title} ({self.get_style_display()})"
 
     def get_preview_public_url(self):
-        """Return the public (raw GitHub) URL of the watermarked preview."""
+        """Return the public (raw GitHub) URL of the watermarked preview, or linked product mockup fallback."""
         from services.github_storage import github_public_url
-        return github_public_url(self.preview_url)
+        if self.preview_url:
+            return github_public_url(self.preview_url)
+        # Fallback to mockup image of any linked product
+        for p in self.products.filter(is_active=True):
+            phys = getattr(p, "physical_detail", None)
+            if phys and phys.mockup_image_url:
+                return phys.mockup_image_url
+        return ""
 
     def get_original_pencil_public_url(self):
         """Return the public URL of the original pencil scan."""
