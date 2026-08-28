@@ -25,7 +25,7 @@ class ProductThumbnailWidget(forms.CheckboxSelectMultiple):
         self._product_map = {str(p.pk): p for p in qs}
         return super().optgroups(name, value, attrs)
 
-    def create_option(self, name, value, label, selected, index, subgroup=None, attrs=None):
+    def create_option(self, name, value, label, selected, index, subgroup=None, attrs=None, subindex=None):
         option = super().create_option(name, value, label, selected, index, subgroup, attrs)
         pk = str(value)
         product = self._product_map.get(pk) if hasattr(self, "_product_map") else None
