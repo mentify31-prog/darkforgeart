@@ -9,102 +9,100 @@ import io
 from django import forms
 from django.contrib import admin
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from .models import Artwork, ArtworkImage, ArtworkTag
 from store.models import Product
 
 
-class ProductThumbnailWidget(forms.CheckboxSelectMultiple):
+class ProductThumbnailWidget(forms.Widget):
     """
-    Checkbox widget that renders each product option with its mockup
-    thumbnail so you can visually identify products when assigning them.
+    Renders each active product as a clickable visual card with its mockup
+    image, name, type and price — entirely server-side, no DOM transformation.
+    JS only handles the click-to-toggle behaviour.
     """
-    def optgroups(self, name, value, attrs=None):
-        # Pre-fetch all products with their physical_detail in one query
-        qs = self.choices.queryset.select_related("physical_detail", "artwork")
-        self._product_map = {str(p.pk): p for p in qs}
-        return super().optgroups(name, value, attrs)
 
-    def create_option(self, name, value, label, selected, index, subgroup=None, attrs=None, subindex=None):
-        option = super().create_option(name, value, label, selected, index, subgroup, attrs)
-        pk = str(value)
-        product = self._product_map.get(pk) if hasattr(self, "_product_map") else None
-        if product:
-            img_url = ""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._products = []
+
+    def set_products(self, products):
+        self._products = list(products)
+
+    def value_from_datadict(self, data, files, name):
+        return data.getlist(name)
+
+    def render(self, name, value, attrs=None, renderer=None):
+        selected_pks = {str(v) for v in (value or [])}
+
+        cards_html = ""
+        for product in self._products:
+            pk = str(product.pk)
+            checked = "checked" if pk in selected_pks else ""
+            selected_cls = "selected" if pk in selected_pks else ""
+
             phys = getattr(product, "physical_detail", None)
             if phys and getattr(phys, "mockup_image_url", ""):
                 img_url = phys.mockup_image_url
             elif product.artwork:
-                img_url = product.artwork.get_preview_public_url()
-            option["attrs"]["data-img"] = img_url
-            option["attrs"]["data-type"] = product.get_product_type_display()
-            option["attrs"]["data-price"] = f"${product.price_usd:.2f}"
-        return option
+                img_url = product.artwork.get_preview_public_url() or ""
+            else:
+                img_url = ""
 
-    def render(self, name, value, attrs=None, renderer=None):
-        # Render the standard checkboxes then inject JS to turn them into cards
-        output = super().render(name, value, attrs, renderer)
-        style = """
+            title = product.title
+            ptype = product.get_product_type_display()
+            price = f"${product.price_usd:.2f}"
+
+            if img_url:
+                media = f'<img src="{img_url}" alt="{title}" loading="lazy">'
+            else:
+                media = '<div class="pti-no-img">📷</div>'
+
+            cards_html += (
+                f'<label class="pti-card {selected_cls}" title="{title}">'
+                f'<input type="checkbox" name="{name}" value="{pk}" {checked} style="display:none">'
+                f'{media}'
+                f'<div class="pti-info">'
+                f'<div class="pti-name">{title}</div>'
+                f'<div class="pti-meta">{ptype} · {price}</div>'
+                f'</div>'
+                f'</label>'
+            )
+
+        count = len(selected_pks)
+        html = f"""
 <style>
-.product-thumb-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; margin-top:8px; }
-.product-thumb-item { border:2px solid #333; border-radius:6px; overflow:hidden; cursor:pointer; transition:border-color .15s; background:#1a1a1a; }
-.product-thumb-item:hover { border-color:#888; }
-.product-thumb-item.selected { border-color:#d90429; background:#2a0a0f; }
-.product-thumb-item input[type=checkbox] { display:none; }
-.product-thumb-item img { width:100%; aspect-ratio:1; object-fit:cover; display:block; background:#111; }
-.product-thumb-item .no-img { width:100%; aspect-ratio:1; display:flex; align-items:center; justify-content:center; color:#555; font-size:2rem; background:#111; }
-.product-thumb-item .info { padding:6px 8px; }
-.product-thumb-item .info .pname { font-size:0.72rem; font-weight:600; color:#ddd; line-height:1.3; margin-bottom:2px; }
-.product-thumb-item .info .pmeta { font-size:0.65rem; color:#888; }
-.product-thumb-selected-count { margin-top:6px; font-size:0.8rem; color:#aaa; }
+.pti-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:8px;}}
+.pti-card{{border:2px solid #444;border-radius:6px;overflow:hidden;cursor:pointer;background:#1a1a1a;display:block;transition:border-color .15s;}}
+.pti-card:hover{{border-color:#888;}}
+.pti-card.selected{{border-color:#d90429;background:#2a0a0f;}}
+.pti-card img{{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#111;}}
+.pti-no-img{{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:2rem;background:#111;}}
+.pti-info{{padding:6px 8px;}}
+.pti-name{{font-size:0.72rem;font-weight:600;color:#ddd;line-height:1.3;margin-bottom:2px;}}
+.pti-meta{{font-size:0.65rem;color:#888;}}
+.pti-count{{margin-top:8px;font-size:0.8rem;color:#aaa;}}
 </style>
-"""
-        script = """
+<div class="pti-grid" id="pti-grid-{name}">{cards_html}</div>
+<div class="pti-count" id="pti-count-{name}">{count} product(s) selected</div>
 <script>
-(function(){
-  var wrap = document.getElementById('product-thumb-wrap');
-  if(!wrap) return;
-  // Django CheckboxSelectMultiple renders div > div > label > input, NOT ul > li
-  var checkboxes = wrap.querySelectorAll('input[type=checkbox]');
-  if(!checkboxes.length) return;
-  var grid = document.createElement('div');
-  grid.className = 'product-thumb-grid';
-  var countEl = document.createElement('div');
-  countEl.className = 'product-thumb-selected-count';
-  function updateCount(){
-    var sel = grid.querySelectorAll('.selected').length;
-    countEl.textContent = sel + ' product(s) selected';
-  }
-  checkboxes.forEach(function(cb){
-    var img = cb.getAttribute('data-img') || '';
-    var label = cb.closest('label') || cb.parentElement;
-    var pname = label ? label.textContent.trim() : '';
-    var ptype = cb.getAttribute('data-type') || '';
-    var pprice = cb.getAttribute('data-price') || '';
-    var card = document.createElement('div');
-    card.className = 'product-thumb-item' + (cb.checked ? ' selected' : '');
-    if(img){
-      card.innerHTML = '<img src="'+img+'" alt="'+pname+'" loading="lazy"><div class="info"><div class="pname">'+pname+'</div><div class="pmeta">'+ptype+' &middot; '+pprice+'</div></div>';
-    } else {
-      card.innerHTML = '<div class="no-img">&#128247;</div><div class="info"><div class="pname">'+pname+'</div><div class="pmeta">'+ptype+' &middot; '+pprice+'</div></div>';
-    }
-    card.appendChild(cb);
-    card.addEventListener('click', function(e){
+(function(){{
+  var grid = document.getElementById('pti-grid-{name}');
+  var countEl = document.getElementById('pti-count-{name}');
+  if (!grid) return;
+  grid.querySelectorAll('.pti-card').forEach(function(card){{
+    card.addEventListener('click', function(e){{
       e.preventDefault();
+      var cb = card.querySelector('input[type=checkbox]');
       cb.checked = !cb.checked;
       card.classList.toggle('selected', cb.checked);
-      updateCount();
-    });
-    grid.appendChild(card);
-  });
-  wrap.innerHTML = '';
-  wrap.appendChild(grid);
-  wrap.appendChild(countEl);
-  updateCount();
-})();
+      countEl.textContent = grid.querySelectorAll('.selected').length + ' product(s) selected';
+    }});
+  }});
+}})();
 </script>
 """
-        return f'<div id="product-thumb-wrap">{output}</div>{style}{script}'
+        return mark_safe(html)
 
 
 class ArtworkImageInline(admin.TabularInline):
@@ -129,12 +127,11 @@ class ArtworkAdminForm(forms.ModelForm):
         label="Auto-watermark final file as preview (only if 'Upload Final Artwork' is provided)",
     )
 
-    linked_products = forms.ModelMultipleChoiceField(
-        queryset=Product.objects.filter(is_active=True).order_by("title"),
+    linked_products = forms.MultiValueField(
+        fields=(),
         required=False,
         label="Assign Store Products",
-        help_text="Click a product card to select/deselect it. Selected cards are highlighted in red.",
-        widget=ProductThumbnailWidget,
+        help_text="Click a product card to select/deselect it. Selected cards highlight red.",
     )
 
     class Meta:
@@ -143,10 +140,32 @@ class ArtworkAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Build the widget with all active products pre-fetched
+        products = list(
+            Product.objects.filter(is_active=True)
+            .select_related("physical_detail", "artwork")
+            .order_by("title")
+        )
+        widget = ProductThumbnailWidget()
+        widget.set_products(products)
+
+        # Replace linked_products with a simple field backed by our custom widget
+        initial_pks = []
         if self.instance and self.instance.pk:
-            self.fields["linked_products"].initial = Product.objects.filter(
-                artwork=self.instance
-            ).values_list("pk", flat=True)
+            initial_pks = list(
+                Product.objects.filter(artwork=self.instance).values_list("pk", flat=True)
+            )
+
+        self.fields["linked_products"] = forms.MultipleChoiceField(
+            choices=[(str(p.pk), p.title) for p in products],
+            required=False,
+            label="Assign Store Products",
+            help_text="Click a product card to select/deselect it. Selected cards highlight red.",
+            widget=widget,
+            initial=initial_pks,
+        )
+        self.initial["linked_products"] = [str(pk) for pk in initial_pks]
 
     def save(self, commit=True):
         artwork = super().save(commit=False)
@@ -219,8 +238,7 @@ class ArtworkAdminForm(forms.ModelForm):
 
     def _save_linked_products(self, artwork):
         """Set artwork FK on selected products; clear it on deselected ones."""
-        selected = set(self.cleaned_data.get("linked_products", []))
-        selected_pks = {p.pk for p in selected}
+        selected_pks = {int(pk) for pk in self.cleaned_data.get("linked_products", []) if pk}
         Product.objects.filter(artwork=artwork).exclude(pk__in=selected_pks).update(artwork=None)
         if selected_pks:
             Product.objects.filter(pk__in=selected_pks).update(artwork=artwork)
@@ -250,7 +268,7 @@ class ArtworkAdmin(admin.ModelAdmin):
         }),
         ("Linked Store Products", {
             "fields": ("linked_products",),
-            "description": "Click a product card to select it. Selected cards highlight red.",
+            "description": "Click a product card to select it. Selected cards highlight red. Hit Save when done.",
         }),
         ("Image Uploads", {
             "fields": (
